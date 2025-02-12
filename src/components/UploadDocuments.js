@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { storage, db } from "../firebase/config"
+import { useState,useEffect } from "react"
+import { storage, db, createSubmission } from "../firebase/config"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { collection, addDoc } from "firebase/firestore"
 import { useAuth } from "../contexts/AuthContext"
 import { Button, Container, Box, Typography, Stepper, Step, StepLabel, CircularProgress } from "@mui/material"
 import BorrowerDetails from "./BorrowerDetails"
@@ -20,6 +19,20 @@ function UploadDocuments() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
   const { currentUser } = useAuth()
+  const [userInfo, setUserInfo] = useState(null)
+
+  useEffect(() => {
+    // Fetch user info from Firestore
+    const fetchUserInfo = async () => {
+      if (currentUser) {
+        const userDoc = await db.collection("users").doc(currentUser.uid).get()
+        if (userDoc.exists) {
+          setUserInfo(userDoc.data())
+        }
+      }
+    }
+    fetchUserInfo()
+  }, [currentUser])
 
   const steps = ["Borrower Details", "Sanction Letter","Facilities", "Securities", "Registration Of Security","Guarantors","Other Documents"]
 
@@ -55,7 +68,7 @@ function UploadDocuments() {
         uploadedFiles[file.name] = downloadURL
       }
 
-      await addDoc(collection(db, "documents"), {
+      const documents = {
         borrowerDetails: formData["Borrower Details"],
         sanctionLetter: formData["Sanction Letter"],
         loanFacilities: formData["Loan Facilities"],
@@ -64,10 +77,9 @@ function UploadDocuments() {
         guarantors: formData["Guarantors"],
         otherDocuments: formData["Other Documents"],
         files: uploadedFiles,
-        uploadedBy: currentUser.uid,
-        status: "pending",
-        uploadedAt: new Date(),
-      })
+      }
+
+      await createSubmission(currentUser.uid, userInfo.bankId, documents)
 
       alert("Documents uploaded successfully")
       setFormData({})

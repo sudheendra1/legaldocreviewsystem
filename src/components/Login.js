@@ -1,8 +1,10 @@
+"use client"
+
 import { useState } from "react"
-import { useHistory } from "react-router-dom"
-import { auth } from "../firebase/config"
 import { signInWithEmailAndPassword } from "firebase/auth"
-import { TextField, Button, Typography, Container, Box } from "@mui/material"
+import { auth, getUserInfo } from "../firebase/config"
+import { useHistory } from "react-router-dom"
+import { TextField, Button, Typography, Container, Box, Alert } from "@mui/material"
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -10,14 +12,23 @@ function Login() {
   const [error, setError] = useState("")
   const history = useHistory()
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
 
     try {
-      await signInWithEmailAndPassword(auth, email, password)
-      history.push("/")
-    } catch {
-      setError("Failed to log in")
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const userInfo = await getUserInfo(userCredential.user.uid)
+
+      if (userInfo) {
+        console.log("User info:", userInfo)
+        // You can store user info in your app's state here if needed
+        history.push("/dashboard")
+      } else {
+        setError("User information not found. Please contact support.")
+      }
+    } catch (error) {
+      setError("Failed to log in. Please check your credentials.")
     }
   }
 
@@ -34,7 +45,7 @@ function Login() {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        {error && <Typography color="error">{error}</Typography>}
+        {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
