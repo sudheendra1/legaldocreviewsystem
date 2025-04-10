@@ -1,13 +1,19 @@
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom"
+// "use client"
+
+// import { useEffect, useState } from "react"
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom"
+import { useAuth } from "./contexts/AuthContext";
+// import { onAuthStateChanged } from "firebase/auth"
+// import { auth } from "./firebase/config"
 import { AuthProvider } from "./contexts/AuthContext"
-import PrivateRoute from "./components/PrivateRoute"
-import ErrorBoundary from "./components/ErrorBoundary"
 import Login from "./components/Login"
 import Dashboard from "./components/Dashboard"
 import UploadDocuments from "./components/UploadDocuments"
 import ReviewDocuments from "./components/ReviewDocuments"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
+import MultiStepForm from "./components/MultiStepForm" 
+// import { CircularProgress, Box } from "@mui/material"
 
 const theme = createTheme({
   palette: {
@@ -21,23 +27,53 @@ const theme = createTheme({
 })
 
 function App() {
+  const { currentUser } = useAuth();
+  // const [user, setUser] = useState(null)
+  // const [loading, setLoading] = useState(true)
+
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+  //     setUser(currentUser)
+  //     setLoading(false)
+  //   })
+
+  //   return () => unsubscribe()
+  // }, [])
+
+  // if (loading) {
+  //   return (
+  //     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+  //       <CircularProgress />
+  //     </Box>
+  //   )
+  // }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ErrorBoundary>
-        <AuthProvider>
-          <Router>
-            <div className="app">
-              <Switch>
-                <Route exact path="/login" component={Login} />
-                <PrivateRoute exact path="/" component={Dashboard} />
-                <PrivateRoute path="/upload" component={UploadDocuments} />
-                <PrivateRoute path="/review" component={ReviewDocuments} />
-              </Switch>
-            </div>
-          </Router>
-        </AuthProvider>
-      </ErrorBoundary>
+      <AuthProvider>
+      <Router>
+        <div className="app">
+          <Switch>
+            {/* <Route exact path="/login">
+              {user ? <Redirect to="/" /> : <Login />}
+            </Route>
+            <Route exact path="/">
+              {user ? <Dashboard /> : <Redirect to="/login" />} */}
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/" component={Dashboard} />
+              <Route path="/upload" component={UploadDocuments} />
+              <Route path="/review" component={ReviewDocuments} />
+              <Route path="/form" component={MultiStepForm} />
+              <Route path="*">
+                <Redirect to="/" />
+            </Route>
+            {/* <Route path="/upload">{user ? <UploadDocuments /> : <Redirect to="/login" />}</Route>
+            <Route path="/review">{user ? <ReviewDocuments /> : <Redirect to="/login" />}</Route> */}
+          </Switch>
+        </div>
+      </Router>
+       </AuthProvider>
     </ThemeProvider>
   )
 }

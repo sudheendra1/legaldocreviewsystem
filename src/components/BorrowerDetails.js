@@ -16,11 +16,16 @@ import {
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
+import uploadFile from "../uploadFile"
+import { doc, setDoc } from "firebase/firestore"
+import { db } from "../firebase/config"
+import { useAuth } from "../contexts/AuthContext.js"
 
 function BorrowerDetails({ onSave }) {
   const [borrowerConstitution, setBorrowerConstitution] = useState("")
   const [formData, setFormData] = useState({})
   const [files, setFiles] = useState({})
+  const { currentUser } = useAuth()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -47,9 +52,40 @@ function BorrowerDetails({ onSave }) {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    // e.preventDefault()
+    // onSave({ ...formData, files, borrowerConstitution })
+
     e.preventDefault()
-    onSave({ ...formData, files, borrowerConstitution })
+
+    try {
+      // Upload all files first
+      const uploadedFiles = {}
+      for (const [fieldName, file] of Object.entries(files)) {
+        const fileUrl = await uploadFile(file)
+        uploadedFiles[fieldName] = fileUrl
+      }
+  
+      // Merge form data
+      const submissionData = {
+        borrowerConstitution,
+        ...formData,
+        uploadedFiles,
+        timestamp: new Date(),
+      }
+  
+      // Save to Firestore under 'submissions' collection
+      // const { currentUser } = useAuth()
+      const submissionRef = doc(db, "submissions", currentUser.uid)
+      await setDoc(submissionRef, submissionData, { merge: true })
+  
+      alert("Saved and uploaded successfully!")
+      // navigate to next step here
+  
+    } catch (err) {
+      console.error("Error uploading or saving data:", err)
+      alert("Failed to save data")
+    }
   }
 
   const renderFormFields = () => {

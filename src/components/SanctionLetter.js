@@ -34,7 +34,7 @@ function SanctionLetter({ onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSave( ...formData,files,facilities)
+    onSave( {...formData,files,facilities})
   }
 
   return (

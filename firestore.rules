@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      // Allow create if the authenticated user is creating their own document
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Allow read, update, delete only if user is authenticated and accessing their own document
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /submissions/{submissionId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+  }
+}

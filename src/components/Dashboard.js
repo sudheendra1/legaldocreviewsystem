@@ -1,9 +1,25 @@
-import { Link } from "react-router-dom"
+"use client"
+import { Link, Redirect } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { Typography, Button, Container, Box } from "@mui/material"
-
+import { Typography, Button, Container, Box, CircularProgress } from "@mui/material"
 function Dashboard() {
-  const { currentUser } = useAuth()
+  const { currentUser, loading } = useAuth()
+
+  // Show loading indicator while auth state is being determined
+  if (loading) {
+    return (
+      <Container component="main" maxWidth="md">
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!currentUser) {
+    return <Redirect to="/login" />
+  }
 
   return (
     <Container component="main" maxWidth="md">
