@@ -150,6 +150,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import BusinessIcon from "@mui/icons-material/Business"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
 import RefreshIcon from "@mui/icons-material/Refresh"
+import { doc, getDoc, query, where } from "firebase/firestore"
 
 function ReviewDocumentsList() {
   const [submissions, setSubmissions] = useState([])
@@ -201,7 +202,12 @@ function ReviewDocumentsList() {
     setLoading(true)
     setError(null)
     try {
-      const querySnapshot = await getDocs(collection(db, "submissions"))
+      // const querySnapshot = await getDocs(collection(db, "submissions"))
+      const q = query(
+              collection(db, "submissions"),
+              where("reviewer", "==", currentUser.uid)
+            )
+            const querySnapshot = await getDocs(q)
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         time:doc.data().time,

@@ -148,10 +148,13 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "../firebase/config"
-import { Container, Typography, Box, Stepper, Step, StepLabel, Paper, CircularProgress, Button } from "@mui/material"
+import { Container, Typography, Box, Stepper, Step, StepLabel, Paper, CircularProgress, Button,TextField } from "@mui/material"
 import { useHistory } from "react-router-dom"
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
+import { useFormData } from "./FormDataManager";
+import { collection, setDoc } from "firebase/firestore";
+import { useAuth } from "../contexts/AuthContext";
 
 function ReviewDocumentDetails() {
   const { id } = useParams()
@@ -159,6 +162,9 @@ function ReviewDocumentDetails() {
   const [loading, setLoading] = useState(true)
   const [activeStep, setActiveStep] = useState(0)
   const history = useHistory()
+  const { formData, setFormData } = useFormData();
+  const { currentUser } = useAuth();  // get reviewer info
+ 
 
   const steps = [
     "Borrower Details",
@@ -169,6 +175,9 @@ function ReviewDocumentDetails() {
     "Guarantors",
     "Other Documents",
   ]
+
+  const stepName = steps[activeStep];
+  const [comment, setComment] = useState(formData?.reviewComments?.[stepName] || "");
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -193,6 +202,35 @@ function ReviewDocumentDetails() {
 
     fetchSubmission()
   }, [id])
+
+  const handleCommentChange = (e) => {
+    setComment(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      reviewComments: {
+        ...(prev.reviewComments || {}),
+        [stepName]: e.target.value,
+      },            
+    }));
+  };
+
+  
+  const handleSubmitReview = async () => {
+    try {
+      await setDoc(doc(db, "reviews", id), {
+        submissionId: id,
+        reviewerUid: currentUser.uid,
+        reviewerName: currentUser.displayName || currentUser.email.split("@")[0],
+        comments: formData.reviewComments || {},
+        submittedAt: new Date()
+      });
+      history.push("/dashboard");
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      alert("Failed to submit review");
+    }
+  };
+  
 
   const handleNext = () => {
     activeStep === steps.length - 1
@@ -302,7 +340,7 @@ function ReviewDocumentDetails() {
   }
 
   const renderFileLink = (url) => {
-    const isPdf = !url.toLowerCase().includes(".pdf")
+    const isPdf = url.toLowerCase().includes(".pdf")
 
     return (
       <Box sx={{ my: 1 }}>
@@ -419,18 +457,29 @@ function ReviewDocumentDetails() {
           {renderStepContent(activeStep)}
         </Typography>
       </Paper>
-
+      <TextField
+  label="Reviewer Comment"
+  multiline
+  fullWidth
+  rows={4}
+  value={comment}
+  onChange={handleCommentChange}
+  sx={{ mt: 2 }}
+/>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Button disabled={activeStep === 0} onClick={handleBack}>
           Back
         </Button>
-       { activeStep!=steps.length-1?<Button variant="contained" onClick={handleNext} disabled={activeStep === steps.length - 1}>
-          Next
-        </Button>:
-        <Button variant="contained" onClick={handleNext} disabled={activeStep != steps.length - 1}>
-          Submit
-        </Button>}
-      </Box>
+        {activeStep === steps.length - 1 ? (
+  <Button variant="contained" color="primary" onClick={handleSubmitReview}>
+    Submit Review
+  </Button>
+) : (
+  <Button variant="contained" onClick={handleNext}>
+    Next
+  </Button>
+)}
+     </Box>
     </Container>
   )
 }
