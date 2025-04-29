@@ -16,6 +16,10 @@ import CssBaseline from "@mui/material/CssBaseline"
 import MultiStepForm from "./components/MultiStepForm" 
 import ReviewDocumentsList from "./components/ReviewDocumentsList"
 import ReviewDocumentDetails from "./components/ReviewDocumentDetails"
+import SeeUploads from "./components/seeUploads"
+import SeeUploadDetails from "./components/seeUploadDetail"
+import AdminDocumentsList from "./components/adminList"
+import ReviewersList from "./components/reviewersList"
 // import { CircularProgress, Box } from "@mui/material"
 
 const theme = createTheme({
@@ -71,6 +75,10 @@ function App() {
               <Route path="/form" component={MultiStepForm} />
               <Route path="/review" exact component={ReviewDocumentsList} />
               <Route path="/review/:id" component={ReviewDocumentDetails} />
+              <Route path="/seeUploads" exact component={SeeUploads} />
+              <Route path="/seeUploads/:id" exact component={SeeUploadDetails} />
+              <Route path="/adminDocs" exact component={AdminDocumentsList} />
+              <Route path="/reviewers" component={ReviewersList} />
               <Route path="*">
                 <Redirect to="/" />
             </Route>
