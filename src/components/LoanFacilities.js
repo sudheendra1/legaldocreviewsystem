@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState , useEffect } from "react"
 import {
   TextField,
   Button,
@@ -16,9 +16,21 @@ import {
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
+import { useFormData } from "./FormDataManager";
 
-function LoanFacilities({ onSave }) {
-  const [facilities, setFacilities] = useState([{ type: "", amount: "", currency: "INR" }])
+function LoanFacilities({ onNext }) {
+  const { formData, setFormData } = useFormData();
+  const [facilities, setFacilities] = useState(formData?.loanFacilities?.facilities || []);
+  
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      loanFacilities: {
+        facilities,
+      },
+    }));
+  }, [facilities, setFormData]);
 
   const handleAddFacility = () => {
     setFacilities([...facilities, { type: "", amount: "", currency: "INR" }])
@@ -37,7 +49,8 @@ function LoanFacilities({ onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSave(facilities)
+    // onSave(facilities)
+    onNext(); 
   }
 
   return (

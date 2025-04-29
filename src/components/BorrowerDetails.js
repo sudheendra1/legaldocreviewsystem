@@ -1,6 +1,294 @@
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import {
+//   TextField,
+//   Button,
+//   Typography,
+//   Box,
+//   Paper,
+//   FormControl,
+//   InputLabel,
+//   Select,
+//   MenuItem,
+//   Grid,
+//   IconButton,
+// } from "@mui/material"
+// import AddIcon from "@mui/icons-material/Add"
+// import DeleteIcon from "@mui/icons-material/Delete"
+// import uploadFile from "../uploadFile"
+// import { doc, setDoc } from "firebase/firestore"
+// import { db } from "../firebase/config"
+// import { useAuth } from "../contexts/AuthContext.js"
+// import { useFormData } from "./FormDataManager";
+
+// function BorrowerDetails({ onNext  }) {
+//   // const [borrowerConstitution, setBorrowerConstitution] = useState("")
+//   // const [formData, setFormData] = useState({})
+//   // const [files, setFiles] = useState({})
+//   // const { currentUser } = useAuth()
+//   const { formData, setFormData } = useFormData();
+//   const [borrowerConstitution, setBorrowerConstitution] = useState(formData?.borrowerDetails?.borrowerConstitution || "");
+//   const [localData, setLocalData] = useState(formData?.borrowerDetails?.formData || {});
+//   const [files, setFiles] = useState(formData?.borrowerDetails?.files || {});
+
+//   useEffect(() => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       borrowerDetails: {
+//         borrowerConstitution,
+//         formData: localData,
+//         files,
+//       },
+//     }));
+//   }, [borrowerConstitution, localData, files]);
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setLocalData((prevState) => ({
+//       ...prevState,
+//       [name]: value,
+//     }));
+//   };
+
+//   const handleFileChange = (e, fieldName) => {
+//     if (e.target.files[0]) {
+//       setFiles((prevState) => ({
+//         ...prevState,
+//         [fieldName]: e.target.files[0],
+//       }));
+//     }
+//   };
+
+//   const handleAddBorrower = () => {
+//     const newBorrowerNumber = Object.keys(localData).filter((key) => key.startsWith("borrowerName")).length + 1;
+//     setLocalData((prevState) => ({
+//       ...prevState,
+//       [`borrowerName${newBorrowerNumber}`]: "",
+//     }));
+//   };
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     onNext();
+//   };
+
+//   const renderFormFields = () => {
+//     switch (borrowerConstitution) {
+//       case "individual":
+//         return (
+//           <>
+//             {Object.keys(localData)
+//               .filter((key) => key.startsWith("borrowerName"))
+//               .map((key, index) => (
+//                 <Box key={index} sx={{ mb: 2 }}>
+//                   <Grid container spacing={2} alignItems="center">
+//                     <Grid item xs={10}>
+//                       <TextField
+//                         fullWidth
+//                         label={`Name of Borrower no. ${index + 1}`}
+//                         name={key}
+//                         value={localData[key]}
+//                         onChange={handleInputChange}
+//                         required
+//                       />
+//                     </Grid>
+//                     <Grid item xs={2}>
+//                       <IconButton
+//                         onClick={() => {
+//                           const newFormData = { ...localData }
+//                           delete newFormData[key]
+//                           setFormData(newFormData)
+//                         }}
+//                         color="error"
+//                       >
+//                         <DeleteIcon />
+//                       </IconButton>
+//                     </Grid>
+//                   </Grid>
+//                 </Box>
+//               ))}
+//             <Button startIcon={<AddIcon />} onClick={handleAddBorrower} sx={{ mt: 2 }}>
+//               Add Borrower
+//             </Button>
+//           </>
+//         )
+//       case "partnership":
+//         return (
+//           <>
+//             <TextField
+//               fullWidth
+//               margin="normal"
+//               label="Name of Firm"
+//               name="firmName"
+//               value={localData.firmName || ""}
+//               onChange={handleInputChange}
+//               required
+//             />
+//             <input type="file" onChange={(e) => handleFileChange(e, "partnershipDeed")} accept="application/pdf" />
+//             <Typography variant="body1">Upload Partnership Deed (PDF only)</Typography>
+//             <input type="file" onChange={(e) => handleFileChange(e, "letterOfPartnership")} accept="application/pdf" />
+//             <Typography variant="body1">Upload Letter of Partnership (PDF only)</Typography>
+//           </>
+//         )
+//      case "llp":
+//           return (
+//             <>
+//               <TextField
+//                 fullWidth
+//                 margin="normal"
+//                 label="Name of LLP"
+//                 name="llpName"
+//                 value={localData.firmName || ""}
+//                 onChange={handleInputChange}
+//                 required
+//               />
+//               <input type="file" onChange={(e) => handleFileChange(e, "registrationDeed")} accept="application/pdf" />
+//               <Typography variant="body1">Upload Registration Deed (PDF only)</Typography>
+//               <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" />
+//               <Typography variant="body1">Upload Resolution of all Partners (PDF only)</Typography>
+//             </>
+//        )
+//       case "society":
+//           return (
+//             <>
+//               <TextField
+//                 fullWidth
+//                 margin="normal"
+//                 label="Name of Society"
+//                 name="societyName"
+//                 value={localData.firmName || ""}
+//                 onChange={handleInputChange}
+//                 required
+//               />
+//               <input type="file" onChange={(e) => handleFileChange(e, "societyMemorandum")} accept="application/pdf" />
+//               <Typography variant="body1">Upload Memorandum of Society (PDF only)</Typography>
+//               <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+//               <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+//               <input type="file" onChange={(e) => handleFileChange(e, "byLaws")} accept="application/pdf" />
+//               <Typography variant="body1">Upload byLaws (PDF only)</Typography>
+//             </>
+//           )
+//       case "trust":
+//         return (
+//                   <>
+//                     <TextField
+//                       fullWidth
+//                       margin="normal"
+//                       label="Name of Trust"
+//                       name="trustName"
+//                       value={localData.firmName || ""}
+//                       onChange={handleInputChange}
+//                       required
+//                     />
+//                     <input type="file" onChange={(e) => handleFileChange(e, "trustDeed")} accept="application/pdf" />
+//                     <Typography variant="body1">Upload Trust Deed (PDF only)</Typography>
+//                     <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+//                     <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+//                     <input type="file" onChange={(e) => handleFileChange(e, "permissionoftrus")} accept="application/pdf" />
+//                     <Typography variant="body1">Upload Permission of Commissioner of Trust (PDF only)</Typography>
+//                   </>
+//                 )
+//       case "huf":
+//          return (
+//               <>
+//                <TextField
+//                   fullWidth
+//                     margin="normal"
+//                     label="Name of HUF"
+//                     name="hufName"
+//                     value={localData.firmName || ""}
+//                      onChange={handleInputChange}
+//                     required
+//                     />
+//                     <input type="file" onChange={(e) => handleFileChange(e, "declarationofkarta")} accept="application/pdf" />
+//                     <Typography variant="body1">Upload Declaration of Karta in Notarized copy (PDF only)</Typography>
+//                      <input type="file" onChange={(e) => handleFileChange(e, "resolutionofHuf")} accept="application/pdf" />
+//                     <Typography variant="body1">Upload Resolution of Members (PDF only)</Typography>
+//                      </>
+//          )
+//       case "company":
+//       return (
+//                     <>
+//                       <TextField
+//                         fullWidth
+//                         margin="normal"
+//                         label="Name of Company"
+//                         name="companyName"
+//                         value={localData.firmName || ""}
+//                         onChange={handleInputChange}
+//                         required
+//                       />
+//                       <input type="file" onChange={(e) => handleFileChange(e, "associationMemorandum")} accept="application/pdf" />
+//                       <Typography variant="body1">Upload Memorandum of Association (PDF only)</Typography>
+//                       <input type="file" onChange={(e) => handleFileChange(e, "articleofassociation")} accept="application/pdf" />
+//                       <Typography variant="body1">Upload Article of Association(PDF only)</Typography>
+//                       <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+//                       <Typography variant="body1">Upload Resolution (PDF only)</Typography>                     
+//                     </>
+//         )
+//       case "other":
+//                 return (
+//                               <>
+//                                 <TextField
+//                                   fullWidth
+//                                   margin="normal"
+//                                   label="Name of Constitution"
+//                                   name="constitutionName"
+//                                   value={localData.firmName || ""}
+//                                   onChange={handleInputChange}
+//                                   required
+//                                 />
+//                                 <input type="file" onChange={(e) => handleFileChange(e, "establishment")} accept="application/pdf" />
+//                                 <Typography variant="body1">Upload Document of Establishment (PDF only)</Typography>
+//                                 <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+//                                 <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+//                                 <input type="file" onChange={(e) => handleFileChange(e, "otherdocs")} accept="application/pdf" />
+//                                 <Typography variant="body1">Upload Other Documents(PDF only)</Typography>
+                               
+//                               </>
+//             )
+//       default:
+//         return null
+//     }
+//   }
+
+//   return (
+//     <Paper elevation={3} sx={{ p: 4 }}>
+//       <Typography variant="h5" gutterBottom>
+//         Borrower Details
+//       </Typography>
+//       <form onSubmit={handleSubmit}>
+//         <FormControl fullWidth margin="normal">
+//           <InputLabel>Borrower Constitution</InputLabel>
+//           <Select value={borrowerConstitution} onChange={(e) => setBorrowerConstitution(e.target.value)} required>
+//             <MenuItem value="individual">Individual</MenuItem>
+//             <MenuItem value="partnership">Partnership</MenuItem>
+//             <MenuItem value="llp">LLP</MenuItem>
+//             <MenuItem value="society">Society</MenuItem>
+//             <MenuItem value="trust">Trust</MenuItem>
+//             <MenuItem value="huf">HUF</MenuItem>
+//             <MenuItem value="company">Company</MenuItem>
+//             <MenuItem value="other">Other</MenuItem>
+//           </Select>
+//         </FormControl>
+
+//         {borrowerConstitution && <Box sx={{ mt: 2 }}>{renderFormFields()}</Box>}
+
+//         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+//           Save and Continue
+//         </Button>
+//       </form>
+//     </Paper>
+//   )
+// }
+
+// export default BorrowerDetails
+
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   TextField,
   Button,
@@ -16,84 +304,68 @@ import {
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
-import uploadFile from "../uploadFile"
-import { doc, setDoc } from "firebase/firestore"
-import { db } from "../firebase/config"
-import { useAuth } from "../contexts/AuthContext.js"
 
-function BorrowerDetails({ onSave }) {
-  const [borrowerConstitution, setBorrowerConstitution] = useState("")
-  const [formData, setFormData] = useState({})
-  const [files, setFiles] = useState({})
-  const { currentUser } = useAuth()
+import { useFormData } from "./FormDataManager";
+
+function BorrowerDetails({ onNext }) {
+  const { formData, setFormData } = useFormData();
+  const [borrowerConstitution, setBorrowerConstitution] = useState(formData?.borrowerDetails?.borrowerConstitution || "");
+  const [localData, setLocalData] = useState(formData?.borrowerDetails?.formData || {});
+  const [files, setFiles] = useState(formData?.borrowerDetails?.files || {});
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      borrowerDetails: {
+        borrowerConstitution,
+        formData: localData,
+        files,
+      },
+    }));
+  }, [borrowerConstitution, localData, files, setFormData]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prevState) => ({
+    const { name, value } = e.target;
+    setLocalData((prevState) => ({
       ...prevState,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files[0]) {
       setFiles((prevState) => ({
         ...prevState,
         [fieldName]: e.target.files[0],
-      }))
+      }));
     }
-  }
+  };
 
   const handleAddBorrower = () => {
-    const newBorrowerNumber = Object.keys(formData).filter((key) => key.startsWith("borrowerName")).length + 1
-    setFormData((prevState) => ({
+    const newBorrowerNumber = Object.keys(localData).filter((key) => key.startsWith("borrowerName")).length + 1;
+    setLocalData((prevState) => ({
       ...prevState,
       [`borrowerName${newBorrowerNumber}`]: "",
-    }))
-  }
+    }));
+  };
 
-  const handleSubmit = async (e) => {
-    // e.preventDefault()
-    // onSave({ ...formData, files, borrowerConstitution })
+  const handleDeleteBorrower = (key) => {
+    const newLocalData = { ...localData };
+    delete newLocalData[key];
+    setLocalData(newLocalData);
+  };
 
-    e.preventDefault()
-
-    try {
-      // Upload all files first
-      const uploadedFiles = {}
-      for (const [fieldName, file] of Object.entries(files)) {
-        const fileUrl = await uploadFile(file)
-        uploadedFiles[fieldName] = fileUrl
-      }
-  
-      // Merge form data
-      const submissionData = {
-        borrowerConstitution,
-        ...formData,
-        uploadedFiles,
-        timestamp: new Date(),
-      }
-  
-      // Save to Firestore under 'submissions' collection
-      // const { currentUser } = useAuth()
-      const submissionRef = doc(db, "submissions", currentUser.uid)
-      await setDoc(submissionRef, submissionData, { merge: true })
-  
-      alert("Saved and uploaded successfully!")
-      // navigate to next step here
-  
-    } catch (err) {
-      console.error("Error uploading or saving data:", err)
-      alert("Failed to save data")
-    }
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onNext(); // move to next step
+  };
 
   const renderFormFields = () => {
     switch (borrowerConstitution) {
       case "individual":
         return (
           <>
-            {Object.keys(formData)
+            {Object.keys(localData)
               .filter((key) => key.startsWith("borrowerName"))
               .map((key, index) => (
                 <Box key={index} sx={{ mb: 2 }}>
@@ -103,20 +375,13 @@ function BorrowerDetails({ onSave }) {
                         fullWidth
                         label={`Name of Borrower no. ${index + 1}`}
                         name={key}
-                        value={formData[key]}
+                        value={localData[key]}
                         onChange={handleInputChange}
                         required
                       />
                     </Grid>
                     <Grid item xs={2}>
-                      <IconButton
-                        onClick={() => {
-                          const newFormData = { ...formData }
-                          delete newFormData[key]
-                          setFormData(newFormData)
-                        }}
-                        color="error"
-                      >
+                      <IconButton onClick={() => handleDeleteBorrower(key)} color="error">
                         <DeleteIcon />
                       </IconButton>
                     </Grid>
@@ -127,7 +392,7 @@ function BorrowerDetails({ onSave }) {
               Add Borrower
             </Button>
           </>
-        )
+        );
       case "partnership":
         return (
           <>
@@ -136,7 +401,7 @@ function BorrowerDetails({ onSave }) {
               margin="normal"
               label="Name of Firm"
               name="firmName"
-              value={formData.firmName || ""}
+              value={localData.firmName || ""}
               onChange={handleInputChange}
               required
             />
@@ -145,128 +410,127 @@ function BorrowerDetails({ onSave }) {
             <input type="file" onChange={(e) => handleFileChange(e, "letterOfPartnership")} accept="application/pdf" />
             <Typography variant="body1">Upload Letter of Partnership (PDF only)</Typography>
           </>
-        )
-     case "llp":
-          return (
-            <>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Name of LLP"
-                name="llpName"
-                value={formData.firmName || ""}
-                onChange={handleInputChange}
-                required
-              />
-              <input type="file" onChange={(e) => handleFileChange(e, "registrationDeed")} accept="application/pdf" />
-              <Typography variant="body1">Upload Registration Deed (PDF only)</Typography>
-              <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" />
-              <Typography variant="body1">Upload Resolution of all Partners (PDF only)</Typography>
-            </>
-       )
+        );
+      case "llp":
+        return (
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of LLP"
+              name="llpName"
+              value={localData.llpName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "registrationDeed")} accept="application/pdf" />
+            <Typography variant="body1">Upload Registration Deed (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution of all Partners (PDF only)</Typography>
+          </>
+        );
       case "society":
-          return (
-            <>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Name of Society"
-                name="societyName"
-                value={formData.firmName || ""}
-                onChange={handleInputChange}
-                required
-              />
-              <input type="file" onChange={(e) => handleFileChange(e, "societyMemorandum")} accept="application/pdf" />
-              <Typography variant="body1">Upload Memorandum of Society (PDF only)</Typography>
-              <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
-              <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-              <input type="file" onChange={(e) => handleFileChange(e, "byLaws")} accept="application/pdf" />
-              <Typography variant="body1">Upload byLaws (PDF only)</Typography>
-            </>
-          )
+        return (
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of Society"
+              name="societyName"
+              value={localData.societyName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "societyMemorandum")} accept="application/pdf" />
+            <Typography variant="body1">Upload Memorandum of Society (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "byLaws")} accept="application/pdf" />
+            <Typography variant="body1">Upload byLaws (PDF only)</Typography>
+          </>
+        );
       case "trust":
         return (
-                  <>
-                    <TextField
-                      fullWidth
-                      margin="normal"
-                      label="Name of Trust"
-                      name="trustName"
-                      value={formData.firmName || ""}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <input type="file" onChange={(e) => handleFileChange(e, "trustDeed")} accept="application/pdf" />
-                    <Typography variant="body1">Upload Trust Deed (PDF only)</Typography>
-                    <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
-                    <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                    <input type="file" onChange={(e) => handleFileChange(e, "permissionoftrus")} accept="application/pdf" />
-                    <Typography variant="body1">Upload Permission of Commissioner of Trust (PDF only)</Typography>
-                  </>
-                )
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of Trust"
+              name="trustName"
+              value={localData.trustName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "trustDeed")} accept="application/pdf" />
+            <Typography variant="body1">Upload Trust Deed (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "permissionoftrust")} accept="application/pdf" />
+            <Typography variant="body1">Upload Permission of Commissioner of Trust (PDF only)</Typography>
+          </>
+        );
       case "huf":
-         return (
-              <>
-               <TextField
-                  fullWidth
-                    margin="normal"
-                    label="Name of HUF"
-                    name="hufName"
-                    value={formData.firmName || ""}
-                     onChange={handleInputChange}
-                    required
-                    />
-                    <input type="file" onChange={(e) => handleFileChange(e, "declarationofkarta")} accept="application/pdf" />
-                    <Typography variant="body1">Upload Declaration of Karta in Notarized copy (PDF only)</Typography>
-                     <input type="file" onChange={(e) => handleFileChange(e, "resolutionofHuf")} accept="application/pdf" />
-                    <Typography variant="body1">Upload Resolution of Members (PDF only)</Typography>
-                     </>
-         )
+        return (
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of HUF"
+              name="hufName"
+              value={localData.hufName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "declarationofkarta")} accept="application/pdf" />
+            <Typography variant="body1">Upload Declaration of Karta (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofHuf")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution of Members (PDF only)</Typography>
+          </>
+        );
       case "company":
-      return (
-                    <>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Name of Company"
-                        name="companyName"
-                        value={formData.firmName || ""}
-                        onChange={handleInputChange}
-                        required
-                      />
-                      <input type="file" onChange={(e) => handleFileChange(e, "associationMemorandum")} accept="application/pdf" />
-                      <Typography variant="body1">Upload Memorandum of Association (PDF only)</Typography>
-                      <input type="file" onChange={(e) => handleFileChange(e, "articleofassociation")} accept="application/pdf" />
-                      <Typography variant="body1">Upload Article of Association(PDF only)</Typography>
-                      <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
-                      <Typography variant="body1">Upload Resolution (PDF only)</Typography>                     
-                    </>
-        )
+        return (
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of Company"
+              name="companyName"
+              value={localData.companyName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "associationMemorandum")} accept="application/pdf" />
+            <Typography variant="body1">Upload Memorandum of Association (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "articleofassociation")} accept="application/pdf" />
+            <Typography variant="body1">Upload Articles of Association (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+          </>
+        );
       case "other":
-                return (
-                              <>
-                                <TextField
-                                  fullWidth
-                                  margin="normal"
-                                  label="Name of Constitution"
-                                  name="constitutionName"
-                                  value={formData.firmName || ""}
-                                  onChange={handleInputChange}
-                                  required
-                                />
-                                <input type="file" onChange={(e) => handleFileChange(e, "establishment")} accept="application/pdf" />
-                                <Typography variant="body1">Upload Document of Establishment (PDF only)</Typography>
-                                <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
-                                <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                                <input type="file" onChange={(e) => handleFileChange(e, "otherdocs")} accept="application/pdf" />
-                                <Typography variant="body1">Upload Other Documents(PDF only)</Typography>
-                               
-                              </>
-            )
+        return (
+          <>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name of Constitution"
+              name="constitutionName"
+              value={localData.constitutionName || ""}
+              onChange={handleInputChange}
+              required
+            />
+            <input type="file" onChange={(e) => handleFileChange(e, "establishment")} accept="application/pdf" />
+            <Typography variant="body1">Upload Document of Establishment (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+            <Typography variant="body1">Upload Resolution (PDF only)</Typography>
+            <input type="file" onChange={(e) => handleFileChange(e, "otherdocs")} accept="application/pdf" />
+            <Typography variant="body1">Upload Other Documents (PDF only)</Typography>
+          </>
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <Paper elevation={3} sx={{ p: 4 }}>
@@ -276,7 +540,11 @@ function BorrowerDetails({ onSave }) {
       <form onSubmit={handleSubmit}>
         <FormControl fullWidth margin="normal">
           <InputLabel>Borrower Constitution</InputLabel>
-          <Select value={borrowerConstitution} onChange={(e) => setBorrowerConstitution(e.target.value)} required>
+          <Select
+            value={borrowerConstitution}
+            onChange={(e) => setBorrowerConstitution(e.target.value)}
+            required
+          >
             <MenuItem value="individual">Individual</MenuItem>
             <MenuItem value="partnership">Partnership</MenuItem>
             <MenuItem value="llp">LLP</MenuItem>
@@ -295,8 +563,7 @@ function BorrowerDetails({ onSave }) {
         </Button>
       </form>
     </Paper>
-  )
+  );
 }
 
-export default BorrowerDetails
-
+export default BorrowerDetails;

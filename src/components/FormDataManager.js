@@ -1,0 +1,23 @@
+import React, { createContext, useState, useContext } from "react";
+
+const FormDataContext = createContext();
+
+export const FormDataProvider = ({ children }) => {
+  const [formData, setFormData] = useState({
+    borrowerDetails: {},
+    guarantors: {},
+    loanFacilities: {},
+    securities: {},
+    registrationOfSecurity: {},
+    sanctionLetter: {},
+    otherDocuments: {}, // store File objects
+  });
+
+  return (
+    <FormDataContext.Provider value={{ formData, setFormData }}>
+      {children}
+    </FormDataContext.Provider>
+  );
+};
+
+export const useFormData = () => useContext(FormDataContext);

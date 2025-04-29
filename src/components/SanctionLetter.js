@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect  } from "react"
 import {
   TextField,
   Button,
@@ -10,18 +10,30 @@ import {
   Grid,
 } from "@mui/material"
 
-function SanctionLetter({ onSave }) {
-  const [facilities, setFacilities] = useState([{ type: "", amount: "", currency: "INR" }])
-  const [formData, setFormData] = useState({})
-  const [files, setFiles] = useState({})
+import { useFormData } from "./FormDataManager";
 
+function SanctionLetter({ onNext }) {
+  const { formData, setFormData } = useFormData();
+  const [description, setDescription] = useState(formData?.sanctionLetter?.description || "");
+  const [files, setFiles] = useState(formData?.sanctionLetter?.files || {});
+
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      sanctionLetter: {
+        description,
+        files,
+      },
+    }));
+  }, [description, files, setFormData]);
   
 
-  const handleFacilityChange = (index, field, value) => {
-    const newFacilities = [...facilities]
-    newFacilities[index][field] = value
-    setFacilities(newFacilities)
-  }
+  // const handleFacilityChange = (index, field, value) => {
+  //   const newFacilities = [...facilities]
+  //   newFacilities[index][field] = value
+  //   setFacilities(newFacilities)
+  // }
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files[0]) {
@@ -34,7 +46,8 @@ function SanctionLetter({ onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSave( {...formData,files,facilities})
+    // onSave( {...formData,files,facilities})
+    onNext();
   }
 
   return (
@@ -42,28 +55,55 @@ function SanctionLetter({ onSave }) {
       <Typography variant="h5" gutterBottom>
         Sanction Letter
       </Typography>
-      <form onSubmit={handleSubmit}>
-        {facilities.map((facility, index) => (
+      {/* <form onSubmit={handleSubmit}>
+        
           <Box key={index} sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  value={facility.type}
-                  onChange={(e) => handleFacilityChange(index, "type", e.target.value)}
-                  required
-                />
+              <TextField
+            fullWidth
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
               </Grid>
               <Grid item xs={12} sm={4}>
-              <input type="file" onChange={(e) => handleFileChange(e, "partnershipDeed")} accept="application/pdf" />
+              <input type="file" onChange={(e) => handleFileChange(e, "SanctionLetter")} accept="application/pdf" />
               <Typography variant="body1">Upload Sanction Letter (PDF only)</Typography>
               </Grid>
               
             </Grid>
           </Box>
-        ))}
         <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, ml: 2 }}>
+          Save Sanction Letter
+        </Button>
+      </form> */}
+
+<form onSubmit={handleSubmit}>
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </Box>
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            Upload Sanction Letter (PDF only)
+          </Typography>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileChange}
+            required
+          />
+        </Box>
+
+        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
           Save Sanction Letter
         </Button>
       </form>

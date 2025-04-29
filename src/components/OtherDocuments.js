@@ -1,12 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect  } from "react"
 import { TextField, Button, Typography, Box, Paper, Grid, IconButton } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
+import { useFormData } from "./FormDataManager";
 
-function OtherDocuments({ onSave }) {
-  const [documents, setDocuments] = useState([{ description: "", file: null }])
+function OtherDocuments({ onNext }) {
+  const { formData, setFormData } = useFormData();
+  const [documents, setDocuments] = useState(formData?.otherDocuments?.documents || [{ description: "", file: null }]);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      otherDocuments: {
+        documents,
+      },
+    }));
+  }, [documents, setFormData]);
 
   const handleAddDocument = () => {
     setDocuments([...documents, { description: "", file: null }])
@@ -30,7 +41,8 @@ function OtherDocuments({ onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSave(documents)
+    // onSave(documents)
+    onNext();
   }
 
   return (

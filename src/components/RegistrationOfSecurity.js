@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState , useEffect } from "react"
 import {
   Button,
   Typography,
@@ -12,11 +12,24 @@ import {
   MenuItem,
   Grid,
 } from "@mui/material"
+import { useFormData } from "./FormDataManager";
 
-function RegistrationOfSecurity({ onSave }) {
-  const [securityType, setSecurityType] = useState("")
+function RegistrationOfSecurity({ onNext }) {
+  const { formData, setFormData } = useFormData();
+  const [securityType, setSecurityType] = useState(formData?.registrationOfSecurity?.securityType || "");
+  const [files, setFiles] = useState(formData?.registrationOfSecurity?.files || {}); 
   const [mortgageType, setMortgageType] = useState("")
-  const [files, setFiles] = useState({})
+
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      registrationOfSecurity: {
+        securityType,
+        files,
+      },
+    }));
+  }, [securityType, files, setFormData]);
 
   const handleSecurityTypeChange = (event) => {
     setSecurityType(event.target.value)
@@ -40,7 +53,8 @@ function RegistrationOfSecurity({ onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSave({ securityType, mortgageType, files })
+    // onSave({ securityType, mortgageType, files })
+    onNext();
   }
 
   const renderSecurityFields = () => {

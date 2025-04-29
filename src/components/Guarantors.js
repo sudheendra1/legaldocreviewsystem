@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState , useEffect} from "react"
 import {
   TextField,
   Button,
@@ -16,49 +16,103 @@ import {
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
+import { useFormData } from "./FormDataManager";
 
-function Guarantors({ onSave }) {
-  const [borrowerConstitution, setBorrowerConstitution] = useState("")
-  const [formData, setFormData] = useState({})
-  const [files, setFiles] = useState({})
+function Guarantors({ onNext }) {
+  // const [borrowerConstitution, setBorrowerConstitution] = useState("")
+  // const [formData, setFormData] = useState({})
+  // const [files, setFiles] = useState({})
+
+  const { formData, setFormData } = useFormData();
+  const [borrowerConstitution, setBorrowerConstitution] = useState(formData?.guarantors?.borrowerConstitution || "");
+  const [localData, setLocalData] = useState(formData?.guarantors?.formData || {});
+  const [files, setFiles] = useState(formData?.guarantors?.files || {});
+  
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [name]: value,
+  //   }))
+  // }
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      guarantors: {
+        borrowerConstitution,
+        formData: localData,
+        files,
+      },
+    }));
+  }, [borrowerConstitution, localData, files, setFormData]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prevState) => ({
+    const { name, value } = e.target;
+    setLocalData((prevState) => ({
       ...prevState,
       [name]: value,
-    }))
-  }
+    }));
+  };
+
+  // const handleFileChange = (e, fieldName) => {
+  //   if (e.target.files[0]) {
+  //     setFiles((prevState) => ({
+  //       ...prevState,
+  //       [fieldName]: e.target.files[0],
+  //     }))
+  //   }
+  // }
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files[0]) {
       setFiles((prevState) => ({
         ...prevState,
         [fieldName]: e.target.files[0],
-      }))
+      }));
     }
-  }
+  };
 
-  const handleAddBorrower = () => {
-    const newBorrowerNumber = Object.keys(formData).filter((key) => key.startsWith("borrowerName")).length + 1
-    setFormData((prevState) => ({
-      ...prevState,
-      [`borrowerName${newBorrowerNumber}`]: "",
-    }))
-  }
+  // const handleAddBorrower = () => {
+  //   const newBorrowerNumber = Object.keys(formData).filter((key) => key.startsWith("borrowerName")).length + 1
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [`borrowerName${newBorrowerNumber}`]: "",
+  //   }))
+  // }
+
+  const handleAddGuarantor = () => {
+    const newGuarantorNumber = Object.keys(localData).filter((key) => key.startsWith("guarantorName")).length + 1;
+setLocalData((prevState) => ({
+  ...prevState,
+  [`guarantorName${newGuarantorNumber}`]: "",
+}));
+  };
+
+  const handleDeleteGuarantor = (key) => {
+    const newLocalData = { ...localData };
+    delete newLocalData[key];
+    setLocalData(newLocalData);
+  };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault()
+  //   onSave({ ...formData, files, borrowerConstitution })
+  // }
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    onSave({ ...formData, files, borrowerConstitution })
-  }
+    e.preventDefault();
+    onNext();
+  };
 
   const renderFormFields = () => {
     switch (borrowerConstitution) {
       case "individual":
         return (
           <>
-            {Object.keys(formData)
-              .filter((key) => key.startsWith("borrowerName"))
+            {Object.keys(localData)
+              .filter((key) => key.startsWith("guarantorName"))
               .map((key, index) => (
                 <Box key={index} sx={{ mb: 2 }}>
                   <Grid container spacing={2} alignItems="center">
@@ -67,18 +121,14 @@ function Guarantors({ onSave }) {
                         fullWidth
                         label={`Name of Guarantor no. ${index + 1}`}
                         name={key}
-                        value={formData[key]}
+                        value={localData[key]}
                         onChange={handleInputChange}
                         required
                       />
                     </Grid>
                     <Grid item xs={2}>
                       <IconButton
-                        onClick={() => {
-                          const newFormData = { ...formData }
-                          delete newFormData[key]
-                          setFormData(newFormData)
-                        }}
+                        onClick={ () => handleDeleteGuarantor(key) }
                         color="error"
                       >
                         <DeleteIcon />
@@ -87,7 +137,7 @@ function Guarantors({ onSave }) {
                   </Grid>
                 </Box>
               ))}
-            <Button startIcon={<AddIcon />} onClick={handleAddBorrower} sx={{ mt: 2 }}>
+            <Button startIcon={<AddIcon />} onClick={handleAddGuarantor} sx={{ mt: 2 }}>
               Add Guarantor
             </Button>
           </>
@@ -100,7 +150,7 @@ function Guarantors({ onSave }) {
               margin="normal"
               label="Name of Firm"
               name="firmName"
-              value={formData.firmName || ""}
+              value={localData.firmName || ""}
               onChange={handleInputChange}
               required
             />
@@ -120,7 +170,7 @@ function Guarantors({ onSave }) {
                   margin="normal"
                   label="Name of LLP"
                   name="llpName"
-                  value={formData.firmName || ""}
+                  value={localData.firmName || ""}
                   onChange={handleInputChange}
                   required
                 />
@@ -140,7 +190,7 @@ function Guarantors({ onSave }) {
                            margin="normal"
                            label="Name of HUF"
                            name="hufName"
-                           value={formData.firmName || ""}
+                           value={localData.firmName || ""}
                             onChange={handleInputChange}
                            required
                            />
@@ -160,7 +210,7 @@ function Guarantors({ onSave }) {
                       margin="normal"
                       label="Name of Society"
                       name="societyName"
-                      value={formData.firmName || ""}
+                      value={localData.firmName || ""}
                       onChange={handleInputChange}
                       required
                     />
@@ -182,7 +232,7 @@ function Guarantors({ onSave }) {
                           margin="normal"
                           label="Name of Trust"
                           name="trustName"
-                          value={formData.firmName || ""}
+                          value={localData.firmName || ""}
                           onChange={handleInputChange}
                           required
                         />
@@ -204,7 +254,7 @@ function Guarantors({ onSave }) {
                               margin="normal"
                               label="Name of Company"
                               name="companyName"
-                              value={formData.firmName || ""}
+                              value={localData.firmName || ""}
                               onChange={handleInputChange}
                               required
                             />
@@ -227,7 +277,7 @@ function Guarantors({ onSave }) {
                                   margin="normal"
                                   label="Name of Constitution"
                                   name="constitutionName"
-                                  value={formData.firmName || ""}
+                                  value={localData.firmName || ""}
                                   onChange={handleInputChange}
                                   required
                                 />
@@ -242,9 +292,6 @@ function Guarantors({ onSave }) {
                                
                               </>
                             )
-            
-      // Add cases for 'llp', 'society', 'trust', 'huf', 'company', and 'other' here
-      // The structure will be similar to the above cases
       default:
         return null
     }
