@@ -2,6 +2,7 @@
 
 // import { useEffect, useState } from "react"
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom"
+import { FormDataProvider } from "./components/FormDataManager";
 import { useAuth } from "./contexts/AuthContext";
 // import { onAuthStateChanged } from "firebase/auth"
 // import { auth } from "./firebase/config"
@@ -13,6 +14,8 @@ import ReviewDocuments from "./components/ReviewDocuments"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import MultiStepForm from "./components/MultiStepForm" 
+import ReviewDocumentsList from "./components/ReviewDocumentsList"
+import ReviewDocumentDetails from "./components/ReviewDocumentDetails"
 // import { CircularProgress, Box } from "@mui/material"
 
 const theme = createTheme({
@@ -49,6 +52,7 @@ function App() {
   // }
 
   return (
+    <FormDataProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -63,8 +67,10 @@ function App() {
               <Route exact path="/login" component={Login} />
               <Route exact path="/" component={Dashboard} />
               <Route path="/upload" component={UploadDocuments} />
-              <Route path="/review" component={ReviewDocuments} />
+              {/* <Route path="/review" component={ReviewDocuments} /> */}
               <Route path="/form" component={MultiStepForm} />
+              <Route path="/review" exact component={ReviewDocumentsList} />
+              <Route path="/review/:id" component={ReviewDocumentDetails} />
               <Route path="*">
                 <Redirect to="/" />
             </Route>
@@ -75,6 +81,7 @@ function App() {
       </Router>
        </AuthProvider>
     </ThemeProvider>
+    </FormDataProvider>
   )
 }
 
