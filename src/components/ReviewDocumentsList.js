@@ -47,18 +47,18 @@ function ReviewDocumentsList() {
   const history = useHistory()
 
   useEffect(() => {
-    if (authLoading) return // Wait until auth is ready
-    if (!currentUser) return // Redirect will happen in render
+    if (authLoading) return
+    if (!currentUser) return 
 
     fetchSubmissions()
   }, [currentUser, authLoading])
 
   useEffect(() => {
-    // Filter submissions based on search term and filter status
+  
     if (submissions.length > 0) {
       let filtered = [...submissions]
 
-      // Apply search filter
+    
       if (searchTerm) {
         filtered = filtered.filter(
           (submission) =>
@@ -70,7 +70,7 @@ function ReviewDocumentsList() {
         )
       }
 
-      // Apply status filter
+      
       if (filterStatus !== "all") {
         filtered = filtered.filter((submission) => (submission?.status || "pending") === filterStatus)
       }
@@ -141,6 +141,8 @@ function ReviewDocumentsList() {
         return "error"
       case "pending":
         return "warning"
+      case "under-review":
+        return "info"
       default:
         return "default"
     }
