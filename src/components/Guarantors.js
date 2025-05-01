@@ -154,11 +154,11 @@ setLocalData((prevState) => ({
               onChange={handleInputChange}
               required
             />
-            <input type="file" onChange={(e) => handleFileChange(e, "partnershipDeed")} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange(e, "partnershipDeed")} accept="application/pdf" required/>
             <Typography variant="body1">Upload Partnership Deed (PDF only)</Typography>
-            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" required/>
             <Typography variant="body1">Upload Resolution of all Partners (PDF only)</Typography>
-            <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
             <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
           </>
         )
@@ -174,11 +174,11 @@ setLocalData((prevState) => ({
                   onChange={handleInputChange}
                   required
                 />
-                <input type="file" onChange={(e) => handleFileChange(e, "registrationDeed")} accept="application/pdf" />
+                <input type="file" onChange={(e) => handleFileChange(e, "registrationDeed")} accept="application/pdf" required/>
                 <Typography variant="body1">Upload Registration Deed (PDF only)</Typography>
-                <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" />
+                <input type="file" onChange={(e) => handleFileChange(e, "resolutionofpartners")} accept="application/pdf" required/>
                 <Typography variant="body1">Upload Resolution of all Partners (PDF only)</Typography>
-                <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+                <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
                 <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
               </>
             )
@@ -194,11 +194,11 @@ setLocalData((prevState) => ({
                             onChange={handleInputChange}
                            required
                            />
-                           <input type="file" onChange={(e) => handleFileChange(e, "declarationofkarta")} accept="application/pdf" />
+                           <input type="file" onChange={(e) => handleFileChange(e, "declarationofkarta")} accept="application/pdf" required/>
                            <Typography variant="body1">Upload Declaration of Karta in Notarized copy (PDF only)</Typography>
-                            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofHuf")} accept="application/pdf" />
+                            <input type="file" onChange={(e) => handleFileChange(e, "resolutionofHuf")} accept="application/pdf" required/>
                            <Typography variant="body1">Upload Resolution of Members (PDF only)</Typography>
-                           <input type="file" onChange={(e) => handleFileChange(e, "guaranteDeed")} accept="application/pdf" />
+                           <input type="file" onChange={(e) => handleFileChange(e, "guaranteDeed")} accept="application/pdf" required/>
                            <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
                             </>
           )
@@ -214,13 +214,13 @@ setLocalData((prevState) => ({
                       onChange={handleInputChange}
                       required
                     />
-                    <input type="file" onChange={(e) => handleFileChange(e, "societyMemorandum")} accept="application/pdf" />
+                    <input type="file" onChange={(e) => handleFileChange(e, "societyMemorandum")} accept="application/pdf" required/>
                     <Typography variant="body1">Upload Memorandum of Society (PDF only)</Typography>
-                    <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+                    <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" required/>
                     <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                    <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+                    <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
                     <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
-                    <input type="file" onChange={(e) => handleFileChange(e, "byLaws")} accept="application/pdf" />
+                    <input type="file" onChange={(e) => handleFileChange(e, "byLaws")} accept="application/pdf" required/>
                     <Typography variant="body1">Upload byLaws (PDF only)</Typography>
                   </>
                 )
@@ -236,13 +236,13 @@ setLocalData((prevState) => ({
                           onChange={handleInputChange}
                           required
                         />
-                        <input type="file" onChange={(e) => handleFileChange(e, "trustDeed")} accept="application/pdf" />
+                        <input type="file" onChange={(e) => handleFileChange(e, "trustDeed")} accept="application/pdf" required/>
                         <Typography variant="body1">Upload Trust Deed (PDF only)</Typography>
-                        <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" />
+                        <input type="file" onChange={(e) => handleFileChange(e, "resolutionofSociety")} accept="application/pdf" required/>
                         <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                        <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+                        <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
                         <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
-                        <input type="file" onChange={(e) => handleFileChange(e, "permissionoftrus")} accept="application/pdf" />
+                        <input type="file" onChange={(e) => handleFileChange(e, "permissionoftrus")} accept="application/pdf" required/>
                         <Typography variant="body1">Upload Permission of Commissioner of Trust (PDF only)</Typography>
                       </>
                     )
@@ -258,13 +258,13 @@ setLocalData((prevState) => ({
                               onChange={handleInputChange}
                               required
                             />
-                            <input type="file" onChange={(e) => handleFileChange(e, "associationMemorandum")} accept="application/pdf" />
+                            <input type="file" onChange={(e) => handleFileChange(e, "associationMemorandum")} accept="application/pdf" required/>
                             <Typography variant="body1">Upload Memorandum of Association (PDF only)</Typography>
-                            <input type="file" onChange={(e) => handleFileChange(e, "articleofassociation")} accept="application/pdf" />
+                            <input type="file" onChange={(e) => handleFileChange(e, "articleofassociation")} accept="application/pdf" required/>
                             <Typography variant="body1">Upload Article of Association(PDF only)</Typography>
-                            <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+                            <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" required/>
                             <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                            <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+                            <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
                             <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
                            
                           </>
@@ -281,13 +281,13 @@ setLocalData((prevState) => ({
                                   onChange={handleInputChange}
                                   required
                                 />
-                                <input type="file" onChange={(e) => handleFileChange(e, "establishment")} accept="application/pdf" />
+                                <input type="file" onChange={(e) => handleFileChange(e, "establishment")} accept="application/pdf" required/>
                                 <Typography variant="body1">Upload Document of Establishment (PDF only)</Typography>
-                                <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" />
+                                <input type="file" onChange={(e) => handleFileChange(e, "resolution")} accept="application/pdf" required/>
                                 <Typography variant="body1">Upload Resolution (PDF only)</Typography>
-                                <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" />
+                                <input type="file" onChange={(e) => handleFileChange(e, "guaranteeDeed")} accept="application/pdf" required/>
                                 <Typography variant="body1">Upload Guarantee Deed (PDF only)</Typography>
-                                <input type="file" onChange={(e) => handleFileChange(e, "otherdocs")} accept="application/pdf" />
+                                <input type="file" onChange={(e) => handleFileChange(e, "otherdocs")} accept="application/pdf" required/>
                                 <Typography variant="body1">Upload Other Documents(PDF only)</Typography>
                                
                               </>

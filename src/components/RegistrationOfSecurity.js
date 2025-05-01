@@ -66,12 +66,14 @@ function RegistrationOfSecurity({ onNext }) {
                   type="file"
                   onChange={(e) => handleFileChange("CopyofCERSAI", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Copy of CERSAI (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("CopyofRoc", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Copy of Roc (PDF only)</Typography>
            
@@ -80,7 +82,7 @@ function RegistrationOfSecurity({ onNext }) {
       case "Other_Than_Company":
         return (
           <>
-            <input type="file" onChange={(e) => handleFileChange("CopyofCERSAI", e)} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange("CopyofCERSAI", e)} accept="application/pdf" required/>
             <Typography variant="body1">Upload Copy of CERSAI (PDF only)</Typography>
           </>
         )

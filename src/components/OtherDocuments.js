@@ -60,11 +60,11 @@ function OtherDocuments({ onNext }) {
                   label="Document Description"
                   value={document.description}
                   onChange={(e) => handleDocumentChange(index, "description", e.target.value)}
-                  required
+                  
                 />
               </Grid>
               <Grid item xs={12} sm={5}>
-                <input type="file" onChange={(e) => handleFileChange(index, e)} required />
+                <input type="file" onChange={(e) => handleFileChange(index, e)}  />
               </Grid>
               <Grid item xs={12} sm={2}>
                 <IconButton onClick={() => handleRemoveDocument(index)} color="error">

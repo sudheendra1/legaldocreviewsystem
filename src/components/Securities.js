@@ -80,24 +80,28 @@ function Securities({ onNext }) {
                   type="file"
                   onChange={(e) => handleFileChange("titleClearanceReport", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Title Clearance Report (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("registeredMortgage", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Registered Mortgage (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("encumbranceCertificate", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Encumbrance Certificate (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("otherDocuments", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload any other Documents (PDF only)</Typography>
               </>
@@ -108,36 +112,42 @@ function Securities({ onNext }) {
                   type="file"
                   onChange={(e) => handleFileChange("titleClearanceReport", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Title Clearance Report (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("mortgageConfirmation", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Letter of Confirmation of Mortgage (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("memorandumOfDeposit", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Memorandum of Deposit (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("document 1", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Document1 mentioned in memorandum (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("document 2", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Document3 mentioned in memorandum (PDF only)</Typography>
                 <input
                   type="file"
                   onChange={(e) => handleFileChange("otherDocuments", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload any other Documents (PDF only)</Typography>
               </>
@@ -147,12 +157,13 @@ function Securities({ onNext }) {
       case "Hypothecation":
         return (
           <>
-            <input type="file" onChange={(e) => handleFileChange("hypothecationDeed", e)} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange("hypothecationDeed", e)} accept="application/pdf" required/>
             <Typography variant="body1">Upload Hypothecation Deed (PDF only)</Typography>
             <input
                   type="file"
                   onChange={(e) => handleFileChange("registrationCopy", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload registration Copy for vehicles (PDF only)</Typography>
           </>
@@ -160,12 +171,13 @@ function Securities({ onNext }) {
       case "Assignment":
         return (
           <>
-            <input type="file" onChange={(e) => handleFileChange("assignmentDeed", e)} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange("assignmentDeed", e)} accept="application/pdf" required/>
             <Typography variant="body1">Upload Assignment Deed (PDF only)</Typography>
             <input
                   type="file"
                   onChange={(e) => handleFileChange("insurance Docs", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Documents related to Confirmation from insurance company in case of insurance (PDF only)</Typography>
           </>
@@ -173,19 +185,20 @@ function Securities({ onNext }) {
       case "Negative Lien Letter":
         return (
           <>
-            <input type="file" onChange={(e) => handleFileChange("negativeLienLetter", e)} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange("negativeLienLetter", e)} accept="application/pdf" required/>
             <Typography variant="body1">Upload Negative Lien Letter (PDF only)</Typography>
           </>
         )
       case "Pledge":
         return (
           <>
-            <input type="file" onChange={(e) => handleFileChange("pledgeDeed", e)} accept="application/pdf" />
+            <input type="file" onChange={(e) => handleFileChange("pledgeDeed", e)} accept="application/pdf" required/>
             <Typography variant="body1">Upload Pledge Deed (PDF only)</Typography>
             <input
                   type="file"
                   onChange={(e) => handleFileChange("registrationCOpy", e)}
                   accept="application/pdf"
+                  required
                 />
                 <Typography variant="body1">Upload Registration Copy if registered (PDF only)</Typography>
           </>

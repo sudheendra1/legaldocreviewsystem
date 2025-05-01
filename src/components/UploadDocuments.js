@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import { createSubmission, getUserInfo, storeMongoDBFileReference } from "../firebase/config";
-import { uploadFileToMongoDB } from "../services/mongoService";
 import { useAuth } from "../contexts/AuthContext";
 import { Button, Container, Box, Typography, Stepper, Step, StepLabel, CircularProgress, Alert } from "@mui/material";
 
