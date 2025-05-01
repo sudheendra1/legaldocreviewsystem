@@ -13,10 +13,10 @@ AWS.config.update({
   secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
 });
 
-console.log("s3_bucket", process.env.REACT_APP_S3_BUCKET_NAME);
-console.log("region", REGION);
-console.log("accessKeyId", process.env.REACT_APP_AWS_ACCESS_KEY_ID);
-console.log("secretAccessKey", process.env.REACT_APP_AWS_SECRET_ACCESS_KEY);
+// console.log("s3_bucket", process.env.REACT_APP_S3_BUCKET_NAME);
+// console.log("region", process.env.REACT_APP_S3_REGION);
+// console.log("accessKeyId", process.env.REACT_APP_AWS_ACCESS_KEY_ID);
+// console.log("secretAccessKey", process.env.REACT_APP_AWS_SECRET_ACCESS_KEY);
 
   // Initialize S3 client
 
