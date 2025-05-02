@@ -479,7 +479,8 @@ function ReviewDocumentsList() {
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
             (submission?.id || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (submission?.submittedBy || "").toLowerCase().includes(searchTerm.toLowerCase()),
+            (submission?.submittedBy || "").toLowerCase().includes(searchTerm.toLowerCase())||
+            (submission?.submissionName || "").toLowerCase().includes(searchTerm.toLowerCase())
         )
       }
 
@@ -517,6 +518,7 @@ function ReviewDocumentsList() {
         time: doc.data().time,
         submittedBy: doc.data().submittedBy,
         status: doc.data().status,
+        submissionName: doc.data().name||"Unnamed Submission",
         ...doc.data(),
         // Add default status if not present
         status: doc.data().status || "pending",
@@ -825,7 +827,7 @@ function ReviewDocumentsList() {
                     </Box>
                     <CardContent sx={{ flexGrow: 1, pt: 4 }}>
                       <Typography variant="h6" component="h2" gutterBottom noWrap>
-                        {submission?.submittedBy || "Unnamed Submission"}
+                        {submission?.submissionName || "Unnamed Submission"}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                         <BusinessIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
@@ -859,10 +861,10 @@ function ReviewDocumentsList() {
 
                       <Box>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          ID
+                          Submitted By:
                         </Typography>
                         <Typography variant="body2" fontWeight="medium" noWrap>
-                          {submission.id}
+                          {submission.submittedBy || "Unnamed Borrower"}
                         </Typography>
                       </Box>
                     </CardContent>

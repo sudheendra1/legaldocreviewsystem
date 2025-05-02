@@ -93,7 +93,8 @@ function AdminDocumentsList() {
               .includes(searchTerm.toLowerCase()) ||
             (submission?.id || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
             (submission?.borrowerDetails?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (submission?.submittedBy || "").toLowerCase().includes(searchTerm.toLowerCase())
+            (submission?.submittedBy || "").toLowerCase().includes(searchTerm.toLowerCase())||
+            (submission?.submissionName || "").toLowerCase().includes(searchTerm.toLowerCase()),
         )
       }
 
@@ -128,6 +129,7 @@ function AdminDocumentsList() {
         submittedBy: doc.data().submittedBy,
         status: doc.data().status,
         reviewer: doc.data().reviewer,
+        submissionName: doc.data().name||"Unnamed Submission",
         ...doc.data(),
         // Add default status if not present
         status: doc.data().status || "pending",
@@ -462,7 +464,7 @@ function AdminDocumentsList() {
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                         <Box>
                           <Typography variant="h6" component="h2" gutterBottom>
-                            {submission?.submittedBy || "Unnamed Borrower"}
+                            {submission?.submissionName || "Unnamed Borrower"}
                           </Typography>
                           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                             <BusinessIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />

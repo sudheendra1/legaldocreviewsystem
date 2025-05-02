@@ -860,6 +860,7 @@ function ReviewDocumentDetails() {
             </Button>
             <Box>
               {activeStep === steps.length - 1 ? (
+                <>
                 <Button
                   variant="contained"
                   color="primary"
@@ -870,6 +871,18 @@ function ReviewDocumentDetails() {
                 >
                   {submitting ? "Submitting..." : "Submit Review"}
                 </Button>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmitReview}
+                  disabled={submitting}
+                  startIcon={<SendIcon />}
+                  sx={{ px: 3 }}
+                >
+                  {submitting ? "Submitting..." : "Submit Review"}
+                </Button>
+                </>
               ) : (
                 <Button
                   variant="contained"

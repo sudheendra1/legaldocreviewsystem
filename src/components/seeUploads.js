@@ -527,7 +527,8 @@ function SeeUploads() {
               .toLowerCase()
               .includes(searchTerm.toLowerCase()) ||
             (submission?.id || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (submission?.borrowerDetails?.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
+            (submission?.borrowerDetails?.name || "").toLowerCase().includes(searchTerm.toLowerCase())||
+            (submission?.submissionName || "").toLowerCase().includes(searchTerm.toLowerCase()),
         )
       }
 
@@ -572,6 +573,7 @@ function SeeUploads() {
             status: docData.status || "pending",
             createdAt: docData.createdAt || { seconds: 0 },
             reviewerName: reviewerName || "Unassigned",
+            submissionname: docData.name,
             ...docData,
           }
         }),
@@ -867,7 +869,7 @@ function SeeUploads() {
                     </Box>
                     <CardContent sx={{ flexGrow: 1, pt: 4 }}>
                       <Typography variant="h6" component="h2" gutterBottom noWrap>
-                        {submission?.borrowerDetails?.name || "Unnamed Submission"}
+                        {submission?.submissionname || "Unnamed Submission"}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                         <BusinessIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
