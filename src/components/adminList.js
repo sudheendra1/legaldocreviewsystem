@@ -50,7 +50,7 @@ import AssignmentIndIcon from "@mui/icons-material/AssignmentInd"
 import UpdateIcon from "@mui/icons-material/Update"
 import CloseIcon from "@mui/icons-material/Close"
 import { doc, query, where, updateDoc } from "firebase/firestore"
-import { arrayUnion, increment } from "firebase/firestore"
+import { arrayUnion, increment,arrayRemove} from "firebase/firestore"
 
 function AdminDocumentsList() {
   const [submissions, setSubmissions] = useState([])
@@ -163,15 +163,39 @@ function AdminDocumentsList() {
 
   const handleAssignReviewer = async () => {
     try {
-      await updateDoc(doc(db, "submissions", assigningSubmissionId), {
+      const submissionDoc = doc(db, "submissions", assigningSubmissionId)
+      const newReviewerDoc = doc(db, "users", selectedReviewer)
+
+
+      if (currentSubmission.reviewer && currentSubmission.reviewer !== selectedReviewer) {
+        const oldReviewerDoc = doc(db, "users", currentSubmission.reviewer)
+        await updateDoc(oldReviewerDoc, {
+          assignedCount: increment(-1),
+          filesAssigned: arrayRemove(assigningSubmissionId),
+          inProgress: increment(-1), // 👈 also decrement inProgress count
+        })
+      }
+
+      await updateDoc(submissionDoc, {
         reviewer: selectedReviewer,
         status: "under-review",
       })
 
-      await updateDoc(doc(db, "users", selectedReviewer), {
+      await updateDoc(newReviewerDoc, {
         assignedCount: increment(1),
         filesAssigned: arrayUnion(assigningSubmissionId),
+        inProgress: increment(1), // 👈 increment inProgress count
       })
+
+      // await updateDoc(doc(db, "submissions", assigningSubmissionId), {
+      //   reviewer: selectedReviewer,
+      //   status: "under-review",
+      // })
+
+      // await updateDoc(doc(db, "users", selectedReviewer), {
+      //   assignedCount: increment(1),
+      //   filesAssigned: arrayUnion(assigningSubmissionId),
+      // })
 
       fetchSubmissions()
       setOpenReviewerDialog(false)
@@ -191,6 +215,24 @@ function AdminDocumentsList() {
       await updateDoc(doc(db, "submissions", assigningSubmissionId), {
         status: assigningStatus,
       })
+
+      if (currentSubmission.reviewer) {
+        const reviewerDoc = doc(db, "users", currentSubmission.reviewer)
+  
+        if (["approved", "rejected"].includes(assigningStatus)) {
+          await updateDoc(reviewerDoc, {
+            assignedCount: increment(-1),
+            filesAssigned: arrayRemove(assigningSubmissionId),
+            inProgress: increment(-1),
+            [assigningStatus]: increment(1), 
+          })
+        } else if (assigningStatus === "completed") {
+          await updateDoc(reviewerDoc, {
+            inProgress: increment(-1),
+            completed: increment(1), 
+          })
+        }
+      }
 
       fetchSubmissions()
       setOpenStatusDialog(false)

@@ -214,6 +214,28 @@ function ReviewersList() {
                         />
                       </Typography>
                     </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+                      <AssignmentIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
+                      <Typography variant="body2" style={{ color: 'green' }}>
+                        <strong>Approved Documents:</strong>{" "}
+                        <Chip
+                          label={user.approved || 0}
+                          size="small"
+                          color={user.assignedCount > 0 ? "primary" : "default"}
+                        />
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+                      <AssignmentIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
+                      <Typography variant="body2" style={{ color: 'red' }}>
+                        <strong>Rejected Documents:</strong>{" "}
+                        <Chip
+                          label={user.rejected || 0}
+                          size="small"
+                          color={user.assignedCount > 0 ? "primary" : "default"}
+                        />
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
