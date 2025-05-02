@@ -24,6 +24,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
@@ -43,18 +44,24 @@ function AdminCreateUser() {
   const [showPassword, setShowPassword] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [role, setRole] = useState("review")
+  const [hasEditedPassword, setHasEditedPassword] = useState(false);
+  const [adminPasswordDialogOpen, setAdminPasswordDialogOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+
   const history = useHistory()
 
   const steps = ["User Details", "Confirmation"]
 
   useEffect(() => {
-    if (email && password === "") {
+    if (email && !hasEditedPassword) {
       const prefix = email.split("@")[0];
       setPassword(`${prefix}123`);
     }
-  }, [email]);
+  }, [email, hasEditedPassword]);
+  
 
   const handleSubmit = async (e) => {
+    setAdminPasswordDialogOpen(false);
     e.preventDefault()
     setError("")
     setLoading(true)
@@ -63,12 +70,13 @@ function AdminCreateUser() {
       const currentUser = auth.currentUser
       const adminEmail = currentUser.email
 
-      const adminPassword = prompt("Re-enter your admin password to Continue:")
-      if (!adminPassword) {
-        setError("Admin password is required to create a new user.")
-        setLoading(false)
-        return
-      }
+      // const adminPassword = prompt("Re-enter your admin password to Continue:")
+      // if (!adminPassword) {
+      //   setError("Admin password is required to create a new user.")
+      //   setLoading(false)
+      //   return
+      // }
+      
 
       let user = null
 
@@ -83,6 +91,7 @@ function AdminCreateUser() {
         role: role,
         allowed: false,
         assignedCount: 0,
+        mustResetPassword: true
       })
 
       console.log("✅ User Created successfully. User:", user)
@@ -153,7 +162,7 @@ function AdminCreateUser() {
               </Alert>
             )}
 
-            <Box component="form" onSubmit={handleSubmit} noValidate>
+            <Box component="form" onSubmit={(e)=>{setAdminPasswordDialogOpen(true); e.preventDefault();}} noValidate>
               <TextField
                 margin="normal"
                 required
@@ -197,7 +206,10 @@ function AdminCreateUser() {
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setHasEditedPassword(true);
+                }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -261,7 +273,31 @@ function AdminCreateUser() {
           </Box>
         )}
       </Paper>
+      <Dialog open={adminPasswordDialogOpen} onClose={() => setAdminPasswordDialogOpen(false)}>
+  <DialogTitle>Admin Password Required</DialogTitle>
+  <DialogContent>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="Admin Password"
+      type="password"
+      fullWidth
+      variant="standard"
+      value={adminPassword}
+      onChange={(e) => setAdminPassword(e.target.value)}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setAdminPasswordDialogOpen(false)}>Cancel</Button>
+    <Button onClick={handleSubmit} disabled={!adminPassword}>
+      Confirm
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Container>
+
+    
   )
 }
 

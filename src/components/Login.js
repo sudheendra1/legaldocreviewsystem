@@ -45,6 +45,7 @@ function Login() {
     try {
       let user = null
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
+       
         user = userCredential.user
 
         const userDoc = await getDoc(doc(db, "users", user.uid))
@@ -53,6 +54,12 @@ function Login() {
           setError("User info not found. Please contact support.")
           setLoading(false)
           return
+        }
+        const userData = userDoc.data();
+        if (userData.mustResetPassword) {
+          
+          history.push("/force-reset");
+          return;
         }
 
         console.log("✅ Login successful. User:", user.uid)

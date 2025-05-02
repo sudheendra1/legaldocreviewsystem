@@ -17,6 +17,7 @@ import SeeUploadDetails from "./components/seeUploadDetail"
 import AdminDocumentsList from "./components/adminList"
 import ReviewersList from "./components/reviewersList"
 import AdminCreateUser from "./components/adminCreateUser"
+import ForceResetPassword from "./components/ForceResetPassword"
 
 const theme = createTheme({
   palette: {
@@ -51,6 +52,7 @@ function App() {
               <Route path="/adminDocs" exact component={AdminDocumentsList} />
               <Route path="/reviewers" component={ReviewersList} />
               <Route path="/createUser" component={AdminCreateUser} />
+              <Route path="/force-reset" component={ForceResetPassword} />
               <Route path="*">
                 <Redirect to="/" />
             </Route>
