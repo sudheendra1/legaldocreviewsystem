@@ -403,6 +403,15 @@ function BorrowerDetails({ onNext }) {
                       variant="outlined"
                       placeholder="Enter borrower's full legal name"
                     />
+
+<Grid item xs={12} md={6}>
+              <FileUpload
+                label="Document of Identity"
+                onChange={(e) => handleFileChange(e, "IndividualIdentity"+(index+1))}
+                required
+                helperText="Upload the official partnership deed document"
+              />
+            </Grid>
                   </CardContent>
                 </Card>
               ))}

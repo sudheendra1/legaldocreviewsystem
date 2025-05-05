@@ -342,28 +342,28 @@ function Securities({ onNext }) {
                   <FileUpload
                     label="Title Clearance Report"
                     onChange={(e) => handleFileChange("titleClearanceReport", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Registered Mortgage"
                     onChange={(e) => handleFileChange("registeredMortgage", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Encumbrance Certificate"
                     onChange={(e) => handleFileChange("encumbranceCertificate", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Other Documents"
                     onChange={(e) => handleFileChange("otherDocuments", e)}
-                    required
+                    
                   />
                 </Grid>
               </Grid>
@@ -375,42 +375,42 @@ function Securities({ onNext }) {
                   <FileUpload
                     label="Title Clearance Report"
                     onChange={(e) => handleFileChange("titleClearanceReport", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Letter of Confirmation of Mortgage"
                     onChange={(e) => handleFileChange("mortgageConfirmation", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Memorandum of Deposit"
                     onChange={(e) => handleFileChange("memorandumOfDeposit", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Document 1 mentioned in memorandum"
                     onChange={(e) => handleFileChange("document 1", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Document 2 mentioned in memorandum"
                     onChange={(e) => handleFileChange("document 2", e)}
-                    required
+                    
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Other Documents"
                     onChange={(e) => handleFileChange("otherDocuments", e)}
-                    required
+                    
                   />
                 </Grid>
               </Grid>
@@ -425,14 +425,14 @@ function Securities({ onNext }) {
               <FileUpload
                 label="Hypothecation Deed"
                 onChange={(e) => handleFileChange("hypothecationDeed", e)}
-                required
+                
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <FileUpload
                 label="Registration Copy for vehicles"
                 onChange={(e) => handleFileChange("registrationCopy", e)}
-                required
+                
               />
             </Grid>
           </Grid>
@@ -448,7 +448,7 @@ function Securities({ onNext }) {
               <FileUpload
                 label="Insurance Documents"
                 onChange={(e) => handleFileChange("insurance Docs", e)}
-                required
+                
                 helperText="Upload documents related to confirmation from insurance company"
               />
             </Grid>
@@ -462,7 +462,7 @@ function Securities({ onNext }) {
               <FileUpload
                 label="Negative Lien Letter"
                 onChange={(e) => handleFileChange("negativeLienLetter", e)}
-                required
+                
               />
             </Grid>
           </Grid>
@@ -478,7 +478,7 @@ function Securities({ onNext }) {
               <FileUpload
                 label="Registration Copy (if registered)"
                 onChange={(e) => handleFileChange("registrationCopy", e)}
-                required
+                
               />
             </Grid>
           </Grid>

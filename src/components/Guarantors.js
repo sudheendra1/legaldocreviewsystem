@@ -450,6 +450,14 @@ function Guarantors({ onNext }) {
                       variant="outlined"
                       placeholder="Enter guarantor's full legal name"
                     />
+                    <Grid item xs={12} md={6}>
+                                  <FileUpload
+                                    label="Document of Identity"
+                                    onChange={(e) => handleFileChange(e, "Gaurantor Identity"+(index+1))}
+                                    required
+                                    helperText="Upload the official partnership deed document"
+                                  />
+                                </Grid>
                   </CardContent>
                 </Card>
               ))}
