@@ -236,11 +236,11 @@ function OtherDocuments({ onNext }) {
 
         <Divider sx={{ my: 3 }} />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="submit" variant="contained" color="primary" size="large">
             Save & Continue
           </Button>
-        </Box>
+        </Box> */}
       </form>
     </Paper>
   )

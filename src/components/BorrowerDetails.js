@@ -409,7 +409,7 @@ function BorrowerDetails({ onNext }) {
                 label="Document of Identity"
                 onChange={(e) => handleFileChange(e, "IndividualIdentity"+(index+1))}
                 required
-                helperText="Upload the official partnership deed document"
+                helperText="Upload the official document of identity"
               />
             </Grid>
                   </CardContent>
@@ -526,6 +526,15 @@ function BorrowerDetails({ onNext }) {
               />
             </Grid>
 
+            {/* <Grid item xs={12} md={6}>
+              <FileUpload
+                label={`Document for ${borrowerConstitution}`}
+                onChange={(e) => handleFileChange(e, borrowerConstitution + "document")}
+                required
+                helperText={`Upload the official document of ${borrowerConstitution}`}
+              />
+            </Grid> */}
+
             {/* Dynamically render file uploads based on entity type */}
             {borrowerConstitution === "company" && (
               <>
@@ -545,6 +554,53 @@ function BorrowerDetails({ onNext }) {
                 </Grid>
                 <Grid item xs={12}>
                   <FileUpload label="Board Resolution" onChange={(e) => handleFileChange(e, "resolution")} required />
+                </Grid>
+              </>
+            )}
+            {borrowerConstitution === "society" && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="ByLaws"
+                    onChange={(e) => handleFileChange(e, "societyBylaws")}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Resolution of Society"
+                    onChange={(e) => handleFileChange(e, "resolutionofSociety")}
+                    required
+                  />
+                </Grid>
+              </>
+            )}
+            {borrowerConstitution === "trust" && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Trust Deed"
+                    onChange={(e) => handleFileChange(e, "trustDeed")}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Resolution of Trust"
+                    onChange={(e) => handleFileChange(e, "resolutionofTrust")}
+                    required
+                  />
+                </Grid>
+              </>
+            )}
+            {borrowerConstitution === "huf" && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Authority Letter"
+                    onChange={(e) => handleFileChange(e, "authorityLetter")}
+                    required
+                  />
                 </Grid>
               </>
             )}
@@ -591,11 +647,11 @@ function BorrowerDetails({ onNext }) {
 
         <Divider sx={{ my: 3 }} />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="submit" variant="contained" color="primary" size="large" disabled={!borrowerConstitution}>
             Save & Continue
           </Button>
-        </Box>
+        </Box> */}
       </form>
     </Paper>
   )

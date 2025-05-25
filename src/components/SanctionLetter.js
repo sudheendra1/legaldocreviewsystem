@@ -186,11 +186,11 @@ function SanctionLetter({ onNext }) {
           </Grid>
         </Grid>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
           <Button type="submit" variant="contained" color="primary" size="large">
             Save & Continue
           </Button>
-        </Box>
+        </Box> */}
       </form>
     </Paper>
   )

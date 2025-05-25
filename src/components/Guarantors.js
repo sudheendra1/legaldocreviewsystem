@@ -506,6 +506,15 @@ function Guarantors({ onNext }) {
               />
             </Grid>
 
+            <Grid item xs={12} md={6}>
+                          <FileUpload
+                            label={`Document for ${borrowerConstitution}`}
+                            onChange={(e) => handleFileChange(e, borrowerConstitution + "document")}
+                            required
+                            helperText={`Upload the official document of ${borrowerConstitution}`}
+                          />
+                        </Grid>
+
             {/* Dynamically render file uploads based on entity type */}
             {borrowerConstitution === "partnership" && (
               <>
@@ -571,11 +580,11 @@ function Guarantors({ onNext }) {
 
         <Divider sx={{ my: 3 }} />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="submit" variant="contained" color="primary" size="large" disabled={!borrowerConstitution}>
             Save & Continue
           </Button>
-        </Box>
+        </Box> */}
       </form>
     </Paper>
   )

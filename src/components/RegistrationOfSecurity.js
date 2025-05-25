@@ -239,11 +239,11 @@ function RegistrationOfSecurity({ onNext }) {
           </Box>
         )}
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
           <Button type="submit" variant="contained" color="primary" size="large" disabled={!securityType}>
             Save & Continue
           </Button>
-        </Box>
+        </Box> */}
       </form>
     </Paper>
   )
