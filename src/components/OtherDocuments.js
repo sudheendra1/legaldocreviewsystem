@@ -101,7 +101,7 @@ import { useFormData } from "./FormDataManager"
 
 function OtherDocuments({ onNext }) {
   const { formData, setFormData } = useFormData()
-  const [documents, setDocuments] = useState(formData?.otherDocuments?.documents || [{ description: "", file: null }])
+  const [documents, setDocuments] = useState(formData?.otherDocuments?.documents || [])
 
   useEffect(() => {
     setFormData((prev) => ({
