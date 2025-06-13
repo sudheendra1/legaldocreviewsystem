@@ -18,6 +18,7 @@ import AdminDocumentsList from "./components/adminList"
 import ReviewersList from "./components/reviewersList"
 import AdminCreateUser from "./components/adminCreateUser"
 import ForceResetPassword from "./components/ForceResetPassword"
+import ReviewDocumentDetailsAdmin from "./components/reviewDocumentDetailsAdmin"
 
 const theme = createTheme({
   palette: {
@@ -53,6 +54,7 @@ function App() {
               <Route path="/reviewers" component={ReviewersList} />
               <Route path="/createUser" component={AdminCreateUser} />
               <Route path="/force-reset" component={ForceResetPassword} />
+              <Route path="/adminDocs/:id" component={ReviewDocumentDetailsAdmin} />
               <Route path="*">
                 <Redirect to="/" />
             </Route>

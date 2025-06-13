@@ -244,7 +244,7 @@ function AdminDocumentsList() {
   }
 
   const handleViewDetails = (id) => {
-    history.push(`/review/${id}`)
+    history.push(`/adminDocs/${id}`)
   }
 
   const handleMenuClick = (event) => {
