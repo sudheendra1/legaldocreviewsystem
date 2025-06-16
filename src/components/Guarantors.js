@@ -455,9 +455,17 @@ function Guarantors({ onNext }) {
                                     label="Document of Identity"
                                     onChange={(e) => handleFileChange(e, "Gaurantor Identity"+(index+1))}
                                     required
-                                    helperText="Upload the official partnership deed document"
+                                    helperText="Upload the official document of identity"
                                   />
                                 </Grid>
+                                <Grid item xs={12} md={6}>
+                          <FileUpload
+                            label={`Gaurantee Deed for ${borrowerConstitution} `}
+                            onChange={(e) => handleFileChange(e, borrowerConstitution + "document")}
+                            required
+                            helperText={`Upload the gaurantee deed of ${borrowerConstitution}`}
+                          />
+                        </Grid>
                   </CardContent>
                 </Card>
               ))}
@@ -468,7 +476,7 @@ function Guarantors({ onNext }) {
           </>
         )
 
-      // Similar pattern for other entity types as in BorrowerDetails
+      
       case "partnership":
       case "llp":
       case "huf":
@@ -476,7 +484,7 @@ function Guarantors({ onNext }) {
       case "trust":
       case "company":
       case "other":
-        // These would follow the same pattern as BorrowerDetails, with appropriate fields
+       
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -553,6 +561,14 @@ function Guarantors({ onNext }) {
                     helperText={`Upload the memorandom of association`}
                   />
                 </Grid>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Articles of Association"
+                    onChange={(e) => handleFileChange(e, "associationArticles")}
+                    required
+                    helperText={`Upload the Articles of association`}
+                  />
+                </Grid>
               </>
             )}
 
@@ -564,6 +580,14 @@ function Guarantors({ onNext }) {
                             onChange={(e) => handleFileChange(e, borrowerConstitution + "resolution")}
                             required
                             helperText={`Upload the resolution for ${borrowerConstitution}`}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <FileUpload
+                            label={`Bylaws for ${borrowerConstitution} `}
+                            onChange={(e) => handleFileChange(e, borrowerConstitution + "Bylaws")}
+                            required
+                            helperText={`Upload the ByLaws for ${borrowerConstitution}`}
                           />
                         </Grid>
               </>)}
@@ -578,7 +602,40 @@ function Guarantors({ onNext }) {
                             helperText={`Upload the resolution for ${borrowerConstitution}`}
                           />
                         </Grid>
+                        <Grid item xs={12} md={6}>
+                          <FileUpload
+                            label={`Trust Deed'`}
+                            onChange={(e) => handleFileChange(e, "TrustDeed")}
+                            required
+                            helperText={`Upload the trust deed`}
+                          />
+                        </Grid>
               </>)}
+              {borrowerConstitution === "huf" && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Authority Letter"
+                    onChange={(e) => handleFileChange(e, "AuthorityLetter")}
+                    helperText={`Upload the Authority Letter`}
+                    required
+                  />
+                </Grid>
+              </>
+            )}
+
+             {borrowerConstitution === "llp" && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FileUpload
+                    label="Partnership Deed"
+                    onChange={(e) => handleFileChange(e, "partnershipDeed")}
+                    helperText={`Upload the partnership deed`}
+                    required
+                  />
+                </Grid>
+              </>
+            )}
 
             {/* Similar patterns for other entity types */}
           </Grid>
