@@ -485,7 +485,7 @@ function BorrowerDetails({ onNext }) {
 
             <Grid item xs={12} md={6}>
               <FileUpload
-                label="Resolution of Partners"
+                label="Partnership authority letter"
                 onChange={(e) => handleFileChange(e, "resolutionofpartners")}
                 required
                 helperText="Upload the resolution signed by all partners"

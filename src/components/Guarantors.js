@@ -358,7 +358,7 @@ import { useFormData } from "./FormDataManager"
 
 function Guarantors({ onNext }) {
   const { formData, setFormData } = useFormData()
-  const [borrowerConstitution, setBorrowerConstitution] = useState(formData?.guarantors?.borrowerConstitution || "")
+  const [guarontorConstitution, setGuarontorConstitution] = useState(formData?.guarantors?.guarontorConstitution || "")
   const [localData, setLocalData] = useState(formData?.guarantors?.formData || {})
   const [files, setFiles] = useState(formData?.guarantors?.files || {})
 
@@ -366,12 +366,12 @@ function Guarantors({ onNext }) {
     setFormData((prev) => ({
       ...prev,
       guarantors: {
-        borrowerConstitution,
+        guarontorConstitution,
         formData: localData,
         files,
       },
     }))
-  }, [borrowerConstitution, localData, files, setFormData])
+  }, [guarontorConstitution, localData, files, setFormData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -410,7 +410,7 @@ function Guarantors({ onNext }) {
   }
 
   const renderFormFields = () => {
-    switch (borrowerConstitution) {
+    switch (guarontorConstitution) {
       case "individual":
         return (
           <>
@@ -460,10 +460,10 @@ function Guarantors({ onNext }) {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Gaurantee Deed for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "document")}
+                            label={`Gaurantee Deed for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "document")}
                             required
-                            helperText={`Upload the gaurantee deed of ${borrowerConstitution}`}
+                            helperText={`Upload the gaurantee deed of ${guarontorConstitution}`}
                           />
                         </Grid>
                   </CardContent>
@@ -491,66 +491,66 @@ function Guarantors({ onNext }) {
               <TextField
                 fullWidth
                 label={`Name of ${
-                  borrowerConstitution === "company"
+                  guarontorConstitution === "company"
                     ? "Company"
-                    : borrowerConstitution === "society"
+                    : guarontorConstitution === "society"
                       ? "Society"
-                      : borrowerConstitution === "trust"
+                      : guarontorConstitution === "trust"
                         ? "Trust"
-                        : borrowerConstitution === "huf"
+                        : guarontorConstitution === "huf"
                           ? "HUF"
-                          : borrowerConstitution === "partnership"
+                          : guarontorConstitution === "partnership"
                             ? "Firm"
-                            : borrowerConstitution === "llp"
+                            : guarontorConstitution === "llp"
                               ? "LLP"
                               : "Entity"
                 }`}
-                name={`${borrowerConstitution}Name`}
-                value={localData[`${borrowerConstitution}Name`] || ""}
+                name={`${guarontorConstitution} Name`}
+                value={localData[`${guarontorConstitution} Name`] || ""}
                 onChange={handleInputChange}
                 required
                 variant="outlined"
-                placeholder={`Enter the legal name of the ${borrowerConstitution}`}
+                placeholder={`Enter the legal name of the ${guarontorConstitution}`}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Gaurantee Deed for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "document")}
+                            label={`Gaurantee Deed for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "document")}
                             required
-                            helperText={`Upload the gaurantee deed of ${borrowerConstitution}`}
+                            helperText={`Upload the gaurantee deed of ${guarontorConstitution}`}
                           />
                         </Grid>
                         
 
             {/* Dynamically render file uploads based on entity type */}
-            {borrowerConstitution === "partnership" && (
+            {guarontorConstitution === "partnership" && (
               <>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Partnership Deed"
-                    onChange={(e) => handleFileChange(e, "partnershipDeed")}
+                    onChange={(e) => handleFileChange(e, "partnership Deed")}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Resolution of Partners"
-                    onChange={(e) => handleFileChange(e, "resolutionofpartners")}
+                    onChange={(e) => handleFileChange(e, "resolution of partners")}
                     required
                   />
                 </Grid>
               </>
             )}
-            {borrowerConstitution === "company" && (
+            {guarontorConstitution === "company" && (
               <>
               <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Resolution for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "resolution")}
+                            label={`Resolution for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "resolution")}
                             required
-                            helperText={`Upload the resolution for ${borrowerConstitution}`}
+                            helperText={`Upload the resolution for ${guarontorConstitution}`}
                           />
                         </Grid>
                 <Grid item xs={12} md={6}>
@@ -572,34 +572,34 @@ function Guarantors({ onNext }) {
               </>
             )}
 
-            {borrowerConstitution === "society" && (
+            {guarontorConstitution === "society" && (
               <>
               <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Resolution for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "resolution")}
+                            label={`Resolution for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "resolution")}
                             required
-                            helperText={`Upload the resolution for ${borrowerConstitution}`}
+                            helperText={`Upload the resolution for ${guarontorConstitution}`}
                           />
                         </Grid>
                         <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Bylaws for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "Bylaws")}
+                            label={`Bylaws for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "Bylaws")}
                             required
-                            helperText={`Upload the ByLaws for ${borrowerConstitution}`}
+                            helperText={`Upload the ByLaws for ${guarontorConstitution}`}
                           />
                         </Grid>
               </>)}
 
-              {borrowerConstitution === "trust" && (
+              {guarontorConstitution === "trust" && (
               <>
               <Grid item xs={12} md={6}>
                           <FileUpload
-                            label={`Resolution for ${borrowerConstitution} `}
-                            onChange={(e) => handleFileChange(e, borrowerConstitution + "resolution")}
+                            label={`Resolution for ${guarontorConstitution} `}
+                            onChange={(e) => handleFileChange(e, guarontorConstitution + "resolution")}
                             required
-                            helperText={`Upload the resolution for ${borrowerConstitution}`}
+                            helperText={`Upload the resolution for ${guarontorConstitution}`}
                           />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -611,12 +611,12 @@ function Guarantors({ onNext }) {
                           />
                         </Grid>
               </>)}
-              {borrowerConstitution === "huf" && (
+              {guarontorConstitution === "huf" && (
               <>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Authority Letter"
-                    onChange={(e) => handleFileChange(e, "AuthorityLetter")}
+                    onChange={(e) => handleFileChange(e, "Authority Letter")}
                     helperText={`Upload the Authority Letter`}
                     required
                   />
@@ -624,12 +624,12 @@ function Guarantors({ onNext }) {
               </>
             )}
 
-             {borrowerConstitution === "llp" && (
+             {guarontorConstitution === "llp" && (
               <>
                 <Grid item xs={12} md={6}>
                   <FileUpload
                     label="Partnership Deed"
-                    onChange={(e) => handleFileChange(e, "partnershipDeed")}
+                    onChange={(e) => handleFileChange(e, "partnership Deed")}
                     helperText={`Upload the partnership deed`}
                     required
                   />
@@ -659,8 +659,8 @@ function Guarantors({ onNext }) {
           <InputLabel id="guarantor-type-label">Guarantor Type</InputLabel>
           <Select
             labelId="guarantor-type-label"
-            value={borrowerConstitution}
-            onChange={(e) => setBorrowerConstitution(e.target.value)}
+            value={guarontorConstitution}
+            onChange={(e) => setGuarontorConstitution(e.target.value)}
             required
             label="Guarantor Type"
           >
@@ -675,7 +675,7 @@ function Guarantors({ onNext }) {
           </Select>
         </FormControl>
 
-        {borrowerConstitution && <Box sx={{ mt: 2, mb: 4 }}>{renderFormFields()}</Box>}
+        {guarontorConstitution && <Box sx={{ mt: 2, mb: 4 }}>{renderFormFields()}</Box>}
 
         <Divider sx={{ my: 3 }} />
 
