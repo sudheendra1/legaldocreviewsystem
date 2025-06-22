@@ -31,6 +31,7 @@ import {
 } from "@mui/material"
 import { UploadIcon, FileTextIcon, LogOutIcon, MenuIcon, UsersIcon, HomeIcon, CheckSquareIcon } from "lucide-react"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
+import ReviewDocumentsList from "./ReviewDocumentsList"
 
 const drawerWidth = 240
 
@@ -298,15 +299,18 @@ function Dashboard() {
           )}
 
           {role === "review" && (
-            <Grid item xs={12} sm={6} md={6}>
-              <ActionCard
-                title="Review Documents"
-                description="Review and process submitted documents"
-                icon={<CheckSquareIcon size={40} />}
-                to="/review"
-                buttonText="Start Reviewing"
-              />
-            </Grid>
+            // <Grid item xs={12} sm={6} md={6}>
+            //   <ActionCard
+            //     title="Review Documents"
+            //     description="Review and process submitted documents"
+            //     icon={<CheckSquareIcon size={40} />}
+            //     to="/review"
+            //     buttonText="Start Reviewing"
+            //   />
+            // </Grid>
+             
+    <ReviewDocumentsList />
+  
           )}
 
           {role === "admin" && (

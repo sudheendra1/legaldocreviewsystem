@@ -1183,7 +1183,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useHistory } from "react-router-dom"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { doc, getDoc, setDoc,updateDoc } from "firebase/firestore"
 import { db } from "../firebase/config"
 import {
   Container,
@@ -1286,6 +1286,9 @@ function ReviewDocumentDetails() {
         documentComments: formData.documentComments || {},
         submittedAt: new Date(),
       })
+      await updateDoc(doc(db, "submissions", id), {
+              status: "under-review",
+            })
       history.push("/dashboard")
     } catch (err) {
       console.error("Error submitting review:", err)
