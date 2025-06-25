@@ -1009,6 +1009,7 @@ function SeeUploadDetails() {
   const [error, setError] = useState(null)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const [reviewer, setReviewer] = useState(null)
 
   const steps = [
     "Borrower Details",
@@ -1032,6 +1033,12 @@ function SeeUploadDetails() {
         if (docSnap.exists()) {
           console.log("Document data:", docSnap.data())
           setSubmission(docSnap.data())
+          if(docSnap.data().reviewer) {
+          const docRefRev = doc(db, "users", docSnap.data().reviewer)
+          const docSnapRev = await getDoc(docRefRev)
+          setReviewer(docSnapRev.data())
+          console.log("Reviewer data:", docSnapRev.data())
+          }
         } else {
           console.error("No such document!")
           setError("Document not found. It may have been deleted or you don't have permission to view it.")
@@ -1450,7 +1457,7 @@ function SeeUploadDetails() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <PersonIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
               <Typography variant="body1" fontWeight="medium">
-                {submission.reviewerName || "Unassigned"}
+                {reviewer.name || "Unassigned"}
               </Typography>
             </Box>
           </Grid>
