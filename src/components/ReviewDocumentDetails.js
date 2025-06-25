@@ -1539,7 +1539,16 @@ function ReviewDocumentDetails() {
 
     return collected
   }
-
+  const sectionFieldOrder = {
+  "Borrower Details": ["borrowerConstitution", "formData", "files"],
+  "Sanction Letter": ["description", "files"],
+  "Facilities": ["facilityType", "documents"],
+  "Securities": ["securityType", "mortgageType", "files"],
+  "Registration of Security": ["securityType", "files"],
+  "Guarantors": ["borrowerConstitution","guarantorConstitution", "guarontorConstitution","formData", "files"],
+  // "Other Documents" – leave as default (no reordering)
+};
+const hiddenHeadings = ["formData", "files"]
   const renderJsonData = (data, level = 0) => {
     if (!data) return null
 
@@ -1568,40 +1577,231 @@ function ReviewDocumentDetails() {
       )
     }
 
-    if (typeof data === "object") {
-      // Special handling for Securities section
-      const isSecuritiesSection = activeStep === 3
+    // if (typeof data === "object") {
+    //   // Special handling for Securities section
+    //   const isSecuritiesSection = activeStep === 3
       
-      if (isSecuritiesSection) {
-        // For Securities section: prioritize security type, then other content in order
-        const priorityFields = ['securityType', 'security_type', 'type', 'natureOfSecurity', 'nature_of_security']
-        const securityTypeEntries = []
-        const otherTextEntries = []
-        const formDataEntries = []
-        const fileEntries = []
+    //   if (isSecuritiesSection) {
+    //     // For Securities section: prioritize security type, then other content in order
+    //     const priorityFields = ['securityType', 'security_type', 'type', 'natureOfSecurity', 'nature_of_security']
+    //     const securityTypeEntries = []
+    //     const otherTextEntries = []
+    //     const formDataEntries = []
+    //     const fileEntries = []
         
-        Object.entries(data).forEach(([key, value]) => {
-          const lowerKey = key.toLowerCase()
-          const isPriorityField = priorityFields.some(field => lowerKey.includes(field.toLowerCase()))
+    //     Object.entries(data).forEach(([key, value]) => {
+    //       const lowerKey = key.toLowerCase()
+    //       const isPriorityField = priorityFields.some(field => lowerKey.includes(field.toLowerCase()))
           
-          if (typeof value === "string") {
-            if (value.match(/\.(pdf|png|jpg|jpeg|gif)($|\?)/i)) {
-              fileEntries.push([key, value])
-            } else if (isPriorityField) {
-              securityTypeEntries.push([key, value])
-            } else {
-              otherTextEntries.push([key, value])
-            }
-          } else {
-            formDataEntries.push([key, value])
+    //       if (typeof value === "string") {
+    //         if (value.match(/\.(pdf|png|jpg|jpeg|gif)($|\?)/i)) {
+    //           fileEntries.push([key, value])
+    //         } else if (isPriorityField) {
+    //           securityTypeEntries.push([key, value])
+    //         } else {
+    //           otherTextEntries.push([key, value])
+    //         }
+    //       } else {
+    //         formDataEntries.push([key, value])
+    //       }
+    //     })
+
+    //     return (
+    //       <Box sx={{ ml: level * 2 }}>
+    //         {/* 1. Render security type first */}
+    //         {securityTypeEntries.map(([key, value]) => (
+    //           <Box key={`security-type-${key}`} sx={{ mb: 2, p: 2, backgroundColor: "primary.50", borderRadius: 1 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //             >
+    //               {formatKey(key)}
+    //             </Typography>
+    //             <Divider sx={{ mb: 1 }} />
+    //             <Typography variant="body1" fontWeight="medium">{value}</Typography>
+    //           </Box>
+    //         ))}
+            
+    //         {/* 2. Render other text content */}
+    //         {otherTextEntries.map(([key, value]) => (
+    //           <Box key={`text-${key}`} sx={{ mb: 2 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //             >
+    //               {formatKey(key)}
+    //             </Typography>
+    //             <Divider sx={{ mb: 1 }} />
+    //             <Typography variant="body1">{value}</Typography>
+    //           </Box>
+    //         ))}
+            
+    //         {/* 3. Render form data */}
+    //         {formDataEntries.map(([key, value]) => (
+    //           <Box key={`form-${key}`} sx={{ mb: 3 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //             >
+    //               {formatKey(key)}
+    //             </Typography>
+    //             <Divider sx={{ mb: 1 }} />
+    //             {renderJsonData(value, level + 1)}
+    //           </Box>
+    //         ))}
+            
+    //         {/* 4. Render files last */}
+    //         {fileEntries.length > 0 && (
+    //           <Box sx={{ mt: 3 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ color: "secondary.main", mb: 2 }}
+    //             >
+    //               Associated Documents
+    //             </Typography>
+    //             <Divider sx={{ mb: 2 }} />
+    //             {fileEntries.map(([key, value]) => (
+    //               <Box key={`file-${key}`} sx={{ mb: 3 }}>
+    //                 <Typography
+    //                   variant="subtitle2"
+    //                   fontWeight="medium"
+    //                   sx={{ textTransform: "capitalize", color: "text.secondary", mb: 1 }}
+    //                 >
+    //                   {formatKey(key)}
+    //                 </Typography>
+    //                 {renderFileLink(value)}
+    //               </Box>
+    //             ))}
+    //           </Box>
+    //         )}
+    //       </Box>
+    //     )
+    //   } else {
+    //     // For other sections: use the previous logic
+    //     const collected = collectContentByType(data)
+        
+    //     return (
+    //       <Box sx={{ ml: level * 2 }}>
+    //         {/* 1. Render all text content first */}
+    //         {collected.text.map((item, index) => {
+    //           if (typeof item === "string") {
+    //             return (
+    //               <Box key={`text-${index}`} sx={{ mb: 2 }}>
+    //                 <Typography variant="body1">{item}</Typography>
+    //               </Box>
+    //             )
+    //           } else {
+    //             return (
+    //               <Box key={`text-${item.key}`} sx={{ mb: 2 }}>
+    //                 <Typography
+    //                   variant="subtitle1"
+    //                   fontWeight="bold"
+    //                   sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //                 >
+    //                   {formatKey(item.key)}
+    //                 </Typography>
+    //                 <Divider sx={{ mb: 1 }} />
+    //                 <Typography variant="body1">{item.value}</Typography>
+    //               </Box>
+    //             )
+    //           }
+    //         })}
+            
+    //         {/* 2. Render all form data (nested objects/arrays) second */}
+    //         {collected.formData.map((item) => (
+    //           <Box key={`form-${item.key}`} sx={{ mb: 3 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //             >
+    //               {formatKey(item.key)}
+    //             </Typography>
+    //             <Divider sx={{ mb: 1 }} />
+    //             {renderJsonData(item.value, level + 1)}
+    //           </Box>
+    //         ))}
+            
+    //         {/* 3. Render all files last */}
+    //         {collected.files.length > 0 && (
+    //           <Box sx={{ mt: 3 }}>
+    //             <Typography
+    //               variant="subtitle1"
+    //               fontWeight="bold"
+    //               sx={{ color: "secondary.main", mb: 2 }}
+    //             >
+    //               Associated Documents
+    //             </Typography>
+    //             <Divider sx={{ mb: 2 }} />
+    //             {collected.files.map((item, index) => {
+    //               if (typeof item === "string") {
+    //                 return (
+    //                   <Box key={`file-${index}`} sx={{ mb: 3 }}>
+    //                     {renderFileLink(item)}
+    //                   </Box>
+    //                 )
+    //               } else {
+    //                 return (
+    //                   <Box key={`file-${item.key}`} sx={{ mb: 3 }}>
+    //                     <Typography
+    //                       variant="subtitle2"
+    //                       fontWeight="medium"
+    //                       sx={{ textTransform: "capitalize", color: "text.secondary", mb: 1 }}
+    //                     >
+    //                       {formatKey(item.key)}
+    //                     </Typography>
+    //                     {renderFileLink(item.value)}
+    //                   </Box>
+    //                 )
+    //               }
+    //             })}
+    //           </Box>
+    //         )}
+    //       </Box>
+    //     )
+    //   }
+    // }
+
+
+if (typeof data === "object") {
+  const stepFields = sectionFieldOrder[steps[activeStep]] || [];
+  const orderedKeys = stepFields.filter((key) => key in data);
+  const remainingKeys = Object.keys(data).filter((key) => !orderedKeys.includes(key));
+
+  return (
+    <Box sx={{ ml: level * 2 }}>
+      {[...orderedKeys, ...remainingKeys].map((key) => {
+        let value = data[key];
+
+        // If this is the 'files' field and it's an array, filter out null/empty items
+        if (key === "files" || key == "documents"&& Array.isArray(value)) {
+           if (Array.isArray(value)) {
+            value = value.filter((item) => item != null && item !== "");
+          } else if (typeof value === "object" && value !== null) {
+            const filteredEntries = Object.entries(value).filter(
+              ([_, val]) => val != null && val !== ""
+            );
+            value = Object.fromEntries(filteredEntries);
           }
-        })
+        }
+
+        if (
+          value == null ||
+          value === "" ||
+          (typeof value === "object" && Object.keys(value).length === 0) ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          return null;
+        }
 
         return (
-          <Box sx={{ ml: level * 2 }}>
-            {/* 1. Render security type first */}
-            {securityTypeEntries.map(([key, value]) => (
-              <Box key={`security-type-${key}`} sx={{ mb: 2, p: 2, backgroundColor: "primary.50", borderRadius: 1 }}>
+          <Box key={key} sx={{ mb: 3 }}>
+            {!hiddenHeadings.includes(key) && data[key] != null && data[key] !== "" &&(
+              <>
                 <Typography
                   variant="subtitle1"
                   fontWeight="bold"
@@ -1610,152 +1810,15 @@ function ReviewDocumentDetails() {
                   {formatKey(key)}
                 </Typography>
                 <Divider sx={{ mb: 1 }} />
-                <Typography variant="body1" fontWeight="medium">{value}</Typography>
-              </Box>
-            ))}
-            
-            {/* 2. Render other text content */}
-            {otherTextEntries.map(([key, value]) => (
-              <Box key={`text-${key}`} sx={{ mb: 2 }}>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ textTransform: "capitalize", color: "primary.main" }}
-                >
-                  {formatKey(key)}
-                </Typography>
-                <Divider sx={{ mb: 1 }} />
-                <Typography variant="body1">{value}</Typography>
-              </Box>
-            ))}
-            
-            {/* 3. Render form data */}
-            {formDataEntries.map(([key, value]) => (
-              <Box key={`form-${key}`} sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ textTransform: "capitalize", color: "primary.main" }}
-                >
-                  {formatKey(key)}
-                </Typography>
-                <Divider sx={{ mb: 1 }} />
-                {renderJsonData(value, level + 1)}
-              </Box>
-            ))}
-            
-            {/* 4. Render files last */}
-            {fileEntries.length > 0 && (
-              <Box sx={{ mt: 3 }}>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ color: "secondary.main", mb: 2 }}
-                >
-                  Associated Documents
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                {fileEntries.map(([key, value]) => (
-                  <Box key={`file-${key}`} sx={{ mb: 3 }}>
-                    <Typography
-                      variant="subtitle2"
-                      fontWeight="medium"
-                      sx={{ textTransform: "capitalize", color: "text.secondary", mb: 1 }}
-                    >
-                      {formatKey(key)}
-                    </Typography>
-                    {renderFileLink(value)}
-                  </Box>
-                ))}
-              </Box>
+              </>
             )}
+            {renderJsonData(value, level + 1)}
           </Box>
-        )
-      } else {
-        // For other sections: use the previous logic
-        const collected = collectContentByType(data)
-        
-        return (
-          <Box sx={{ ml: level * 2 }}>
-            {/* 1. Render all text content first */}
-            {collected.text.map((item, index) => {
-              if (typeof item === "string") {
-                return (
-                  <Box key={`text-${index}`} sx={{ mb: 2 }}>
-                    <Typography variant="body1">{item}</Typography>
-                  </Box>
-                )
-              } else {
-                return (
-                  <Box key={`text-${item.key}`} sx={{ mb: 2 }}>
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ textTransform: "capitalize", color: "primary.main" }}
-                    >
-                      {formatKey(item.key)}
-                    </Typography>
-                    <Divider sx={{ mb: 1 }} />
-                    <Typography variant="body1">{item.value}</Typography>
-                  </Box>
-                )
-              }
-            })}
-            
-            {/* 2. Render all form data (nested objects/arrays) second */}
-            {collected.formData.map((item) => (
-              <Box key={`form-${item.key}`} sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ textTransform: "capitalize", color: "primary.main" }}
-                >
-                  {formatKey(item.key)}
-                </Typography>
-                <Divider sx={{ mb: 1 }} />
-                {renderJsonData(item.value, level + 1)}
-              </Box>
-            ))}
-            
-            {/* 3. Render all files last */}
-            {collected.files.length > 0 && (
-              <Box sx={{ mt: 3 }}>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ color: "secondary.main", mb: 2 }}
-                >
-                  Associated Documents
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                {collected.files.map((item, index) => {
-                  if (typeof item === "string") {
-                    return (
-                      <Box key={`file-${index}`} sx={{ mb: 3 }}>
-                        {renderFileLink(item)}
-                      </Box>
-                    )
-                  } else {
-                    return (
-                      <Box key={`file-${item.key}`} sx={{ mb: 3 }}>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight="medium"
-                          sx={{ textTransform: "capitalize", color: "text.secondary", mb: 1 }}
-                        >
-                          {formatKey(item.key)}
-                        </Typography>
-                        {renderFileLink(item.value)}
-                      </Box>
-                    )
-                  }
-                })}
-              </Box>
-            )}
-          </Box>
-        )
-      }
-    }
+        );
+      })}
+    </Box>
+  );
+}
 
     return <Typography variant="body1">{String(data)}</Typography>
   }

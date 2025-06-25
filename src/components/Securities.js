@@ -31,12 +31,12 @@ function Securities({ onNext }) {
     setFormData((prev) => ({
       ...prev,
       securities: {
-        securityType,
-        mortgageType,
         files,
+        mortgageType,
+        securityType,
       },
     }))
-  }, [securityType, mortgageType, files, setFormData])
+  }, [files,mortgageType,securityType, setFormData])
 
   const handleSecurityTypeChange = (event) => {
     setSecurityType(event.target.value)

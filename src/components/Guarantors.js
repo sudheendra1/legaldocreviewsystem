@@ -358,7 +358,7 @@ import { useFormData } from "./FormDataManager"
 
 function Guarantors({ onNext }) {
   const { formData, setFormData } = useFormData()
-  const [guarontorConstitution, setGuarontorConstitution] = useState(formData?.guarantors?.guarontorConstitution || "")
+  const [guarontorConstitution, setGuarontorConstitution] = useState(formData?.guarantors?.guarantorConstitution || "")
   const [localData, setLocalData] = useState(formData?.guarantors?.formData || {})
   const [files, setFiles] = useState(formData?.guarantors?.files || {})
 
@@ -371,7 +371,7 @@ function Guarantors({ onNext }) {
         files,
       },
     }))
-  }, [guarontorConstitution, localData, files, setFormData])
+  }, [guarontorConstitution, formData, files, setFormData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target

@@ -1266,17 +1266,19 @@ function SeeUploadDetails() {
       </Box>
     )
   }
+  const sectionFieldOrder = {
+  "Borrower Details": ["borrowerConstitution", "formData", "files"],
+  "Sanction Letter": ["description", "files"],
+  "Facilities": ["facilityType", "documents"],
+  "Securities": ["securityType", "mortgageType", "files"],
+  "Registration of Security": ["securityType", "files"],
+  "Guarantors": ["borrowerConstitution","guarantorConstitution", "guarontorConstitution","formData", "files"],
+  // "Other Documents" – leave as default (no reordering)
+};
+const hiddenHeadings = ["formData", "files"]
 
   const renderJsonData = (data, level = 0) => {
     if (!data) return null
-
-    if (typeof data === "string") {
-      // Check if the string is a URL to a PDF or image
-      if (data.match(/\.(pdf|png|jpg|jpeg|gif)($|\?)/i)) {
-        return renderFileLink(data)
-      }
-      return <Typography variant="body1">{data}</Typography>
-    }
 
     if (Array.isArray(data)) {
       return (
@@ -1294,26 +1296,83 @@ function SeeUploadDetails() {
         </Box>
       )
     }
+    // if (typeof data === "object") {
+    //   return (
+    //     <Box sx={{ ml: level * 2 }}>
+    //       {Object.entries(data).map(([key, value]) => (
+    //         <Box key={key} sx={{ mb: 3 }}>
+    //           <Typography
+    //             variant="subtitle1"
+    //             fontWeight="bold"
+    //             sx={{ textTransform: "capitalize", color: "primary.main" }}
+    //           >
+    //             {formatKey(key)}
+    //           </Typography>
+    //           <Divider sx={{ mb: 1 }} />
+    //           {renderJsonData(value, level + 1)}
+    //         </Box>
+    //       ))}
+    //     </Box>
+    //   )
+    // }
 
-    if (typeof data === "object") {
-      return (
-        <Box sx={{ ml: level * 2 }}>
-          {Object.entries(data).map(([key, value]) => (
-            <Box key={key} sx={{ mb: 3 }}>
-              <Typography
-                variant="subtitle1"
-                fontWeight="bold"
-                sx={{ textTransform: "capitalize", color: "primary.main" }}
-              >
-                {formatKey(key)}
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              {renderJsonData(value, level + 1)}
-            </Box>
-          ))}
-        </Box>
-      )
+    if (typeof data === "object" && data !== null) {
+  const orderedKeys =
+    sectionFieldOrder[steps[activeStep]]?.filter((key) => key in data) || Object.keys(data);
+
+  const remainingKeys = Object.keys(data).filter((key) => !orderedKeys.includes(key));
+
+  // return (
+  //   <Box sx={{ ml: level * 2 }}>
+  //     {[...orderedKeys, ...remainingKeys].map((key) => (
+  //       <Box key={key} sx={{ mb: 3 }}>
+  //         <Typography
+  //           variant="subtitle1"
+  //           fontWeight="bold"
+  //           sx={{ textTransform: "capitalize", color: "primary.main" }}
+  //         >
+  //           {formatKey(key)}
+  //         </Typography>
+  //         <Divider sx={{ mb: 1 }} />
+  //         {renderJsonData(data[key], level + 1)}
+  //       </Box>
+  //     ))}
+  //   </Box>
+  // );
+
+  return (
+  <Box sx={{ ml: level * 2 }}>
+    {[...orderedKeys, ...remainingKeys].map((key) => (
+      <Box key={key} sx={{ mb: 3 }}>
+        {!hiddenHeadings.includes(key) &&data[key] != null && data[key] !== "" && (
+          <>
+            <Typography
+              variant="subtitle1"
+              fontWeight="bold"
+              sx={{ textTransform: "capitalize", color: "primary.main" }}
+            >
+              {formatKey(key)}
+            </Typography>
+            <Divider sx={{ mb: 1 }} />
+          </>
+        )}
+        {renderJsonData(data[key], level + 1)}
+      </Box>
+    ))}
+  </Box>
+)
+}
+    if (typeof data === "string") {
+      // Check if the string is a URL to a PDF or image
+      if (data.match(/\.(pdf|png|jpg|jpeg|gif)($|\?)/i)) {
+        return renderFileLink(data)
+      }
+      return <Typography variant="body1">{data}</Typography>
     }
+
+    
+
+    
 
     return <Typography variant="body1">{String(data)}</Typography>
   }
@@ -1457,7 +1516,7 @@ function SeeUploadDetails() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <PersonIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />
               <Typography variant="body1" fontWeight="medium">
-                {reviewer.name || "Unassigned"}
+                {reviewer!=null?reviewer.name : "Unassigned"}
               </Typography>
             </Box>
           </Grid>

@@ -10,7 +10,7 @@ export const FormDataProvider = ({ children }) => {
     securities: {},
     registrationOfSecurity: {},
     sanctionLetter: {},
-    otherDocuments: {}, // store File objects
+    otherDocuments: {}, 
   });
 
   return (

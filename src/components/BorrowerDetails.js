@@ -324,7 +324,7 @@ function BorrowerDetails({ onNext }) {
         files,
       },
     }))
-  }, [borrowerConstitution, localData, files, setFormData])
+  }, [borrowerConstitution, formData, files, setFormData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
