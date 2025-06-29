@@ -1239,7 +1239,7 @@ function ReviewDocumentDetails() {
     "Other Documents",
   ]
 
-  const stepName = steps[activeStep]
+  // const stepName = steps[activeStep]
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -1778,7 +1778,7 @@ if (typeof data === "object") {
         let value = data[key];
 
         // If this is the 'files' field and it's an array, filter out null/empty items
-        if (key === "files" || key == "documents"&& Array.isArray(value)) {
+        if ((key === "files" || key === "documents")&& Array.isArray(value)) {
            if (Array.isArray(value)) {
             value = value.filter((item) => item != null && item !== "");
           } else if (typeof value === "object" && value !== null) {
