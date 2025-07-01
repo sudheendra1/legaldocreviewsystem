@@ -1186,7 +1186,8 @@ function AdminDocumentsList() {
                       sx={{
                         width: { xs: "100%", md: "8px" },
                         height: { xs: "8px", md: "auto" },
-                        backgroundColor: (theme) => theme.palette[getStatusColor(submission.status)].main,
+                                                   borderColor: (theme) =>
+  theme.palette[getStatusColor(submission.status)]?.main || theme.palette.grey[400],
                       }}
                     />
                     <CardContent sx={{ flexGrow: 1, p: 3 }}>

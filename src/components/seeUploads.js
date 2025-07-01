@@ -859,8 +859,12 @@ function SeeUploads() {
                           sx={{
                             bgcolor: "background.paper",
                             border: "2px solid",
-                            borderColor: (theme) => theme.palette[getStatusColor(submission.status)].main,
-                            color: (theme) => theme.palette[getStatusColor(submission.status)].main,
+                            borderColor: (theme) =>
+  theme.palette[getStatusColor(submission.status)]?.main || theme.palette.grey[400],
+
+                            color: (theme) =>
+  theme.palette[getStatusColor(submission.status)]?.main || theme.palette.grey[700],
+
                           }}
                         >
                           <DescriptionIcon />

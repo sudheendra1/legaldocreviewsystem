@@ -1275,8 +1275,12 @@ function ReviewDocumentsList() {
                           sx={{
                             bgcolor: "background.paper",
                             border: "2px solid",
-                            borderColor: (theme) => theme.palette[getStatusColor(submission.status)].main,
-                            color: (theme) => theme.palette[getStatusColor(submission.status)].main,
+                            borderColor: (theme) =>
+  theme.palette[getStatusColor(submission.status)]?.main || theme.palette.grey[400],
+
+                           caretColorolor: (theme) =>
+  theme.palette[getStatusColor(submission.status)]?.main || theme.palette.grey[400],
+
                           }}
                         >
                           {submission?.submittedBy?.charAt(0).toUpperCase() || "U"}
