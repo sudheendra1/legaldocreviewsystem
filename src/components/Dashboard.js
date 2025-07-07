@@ -160,7 +160,7 @@ function Dashboard() {
               <ListItemIcon>
                 <UploadIcon size={20} />
               </ListItemIcon>
-              <ListItemText primary="Upload Documents" />
+              <ListItemText primary="Vetting of loan documents" />
             </ListItem>
             <ListItem button component={Link} to="/seeUploads">
               <ListItemIcon>
@@ -168,16 +168,62 @@ function Dashboard() {
               </ListItemIcon>
               <ListItemText primary="My Uploads" />
             </ListItem>
+            <ListItem button component={Link} to="/litigation">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Litigation Monitoring" />
+            </ListItem>
+            <ListItem button component={Link} to="/training">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Training" />
+            </ListItem>
+            <ListItem button component={Link} to="/health">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Health consultation" />
+            </ListItem>
+            <ListItem button component={Link} to="/guidance">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Guidance to startups" />
+            </ListItem>
+            <ListItem button component={Link} to="/research">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Research" />
+            </ListItem>
+            <ListItem button component={Link} to="/notation">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Nation's Enemy" />
+            </ListItem>
           </>
         )}
 
         {role === "review" && (
+          <>
           <ListItem button component={Link} to="/review">
             <ListItemIcon>
               <CheckSquareIcon size={20} />
             </ListItemIcon>
             <ListItemText primary="Review Documents" />
           </ListItem>
+          <ListItem button component={Link} to="/willFullDefaulter">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="WillFull Defaulter" />
+            </ListItem>
+          
+          </>
+          
         )}
 
         {role === "admin" && (
@@ -186,7 +232,49 @@ function Dashboard() {
               <ListItemIcon>
                 <FileTextIcon size={20} />
               </ListItemIcon>
-              <ListItemText primary="All Documents" />
+              <ListItemText primary="Vetting of loan documents" />
+            </ListItem>
+            <ListItem button component={Link} to="/litigation">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Litigation Monitoring" />
+            </ListItem>
+            <ListItem button component={Link} to="/training">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Training" />
+            </ListItem>
+            <ListItem button component={Link} to="/willFullDefaulterDashboard">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="WillFull Defaulter" />
+            </ListItem>
+            <ListItem button component={Link} to="/health">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Health consultation" />
+            </ListItem>
+            <ListItem button component={Link} to="/guidance">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Guidance to startups" />
+            </ListItem>
+            <ListItem button component={Link} to="/research">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Research" />
+            </ListItem>
+            <ListItem button component={Link} to="/notation">
+              <ListItemIcon>
+                <FileTextIcon size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Notation ecr" />
             </ListItem>
             <ListItem button component={Link} to="/reviewers">
               <ListItemIcon>
@@ -235,7 +323,7 @@ function Dashboard() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Legal Document Review System
+            JuraTech
           </Typography>
         </Toolbar>
       </AppBar>

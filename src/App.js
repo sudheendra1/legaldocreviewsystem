@@ -19,6 +19,15 @@ import ReviewersList from "./components/reviewersList"
 import AdminCreateUser from "./components/adminCreateUser"
 import ForceResetPassword from "./components/ForceResetPassword"
 import ReviewDocumentDetailsAdmin from "./components/reviewDocumentDetailsAdmin"
+import NotationPage from "./components/Notation/notaionMain"
+import TrainingPage from "./components/Training/trainingMain"
+import LitigationPage from "./components/Litigation/litigationMain"
+import GuidancePage from "./components/Guidance/guidanceMain"
+import HealthPage from "./components/Health concovation/healthMain"
+import ResearchPage from "./components/Research/researchMain"
+import WillfulDefaulterForm from "./components/Wilfull defaulter/wilfulDefaulterMain"
+import WillfulDefaulterDashboard from "./components/Wilfull defaulter/willfulDefaulterDashboard"
+import WillfulDefaulterDetails from "./components/Wilfull defaulter/willfullDefaulterDetails";
 
 const theme = createTheme({
   palette: {
@@ -55,6 +64,16 @@ function App() {
               <Route path="/createUser" component={AdminCreateUser} />
               <Route path="/force-reset" component={ForceResetPassword} />
               <Route path="/adminDocs/:id" component={ReviewDocumentDetailsAdmin} />
+              <Route path="/litigation" component={LitigationPage} />
+              <Route path="/guidance" component={GuidancePage} />
+              <Route path="/health" component={HealthPage} />
+              <Route path="/notation" component={NotationPage} />
+              <Route path="/research" component={ResearchPage} />
+              <Route path="/training" component={TrainingPage} />
+              <Route path="/willFullDefaulter" component={WillfulDefaulterForm} />
+              <Route path="/willFullDefaulterDashboard" component={WillfulDefaulterDashboard} />
+              <Route path="/willful-defaulter-details/:id" component={WillfulDefaulterDetails} />
+              
               <Route path="*">
                 <Redirect to="/" />
             </Route>
