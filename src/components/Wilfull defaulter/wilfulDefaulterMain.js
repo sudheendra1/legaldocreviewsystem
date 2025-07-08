@@ -1,33 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { saveWillfulDefaulterData, saveWillfulDefaulterDraft } from "../..//utils/willfulDefaulterService"
+import { useState, useEffect } from "react"
+import { saveWillfulDefaulterData, saveWillfulDefaulterDraft } from "../../utils/willfulDefaulterService"
 import { useAuth } from "../../contexts/AuthContext"
 import { useHistory } from "react-router-dom"
 
-// Credit facilities list (same as loan documents module)
-const creditFacilities = [
-  "Cash Credit",
-  "Overdraft",
-  "Term Loan",
-  "Working Capital Term Loan",
-  "Equipment Finance",
-  "Vehicle Loan",
-  "Home Loan",
-  "Personal Loan",
-  "Education Loan",
-  "Gold Loan",
-  "Loan Against Property",
-  "Trade Finance",
-  "Letter of Credit",
-  "Secured Packing Credits",
-  "Export Credit",
-  "Import Finance",
-  "Bill Discounting",
-  "Factoring",
-  "Supply Chain Finance",
-  "MSME Loans",
-]
+// Credit facilities list - simplified to only two options
+const creditFacilities = ["Cash Credit", "Term Loan"]
 
 const constitutionTypes = ["Individual", "Partnership firm", "LLP", "Trust", "HUF", "Society", "Company", "Other"]
 
@@ -41,22 +20,42 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
   const [zone, setZone] = useState("")
 
   // Borrowers
-  const [borrowers, setBorrowers] = useState([{ id: "1", constitution: "", name: "", documents: [] }])
+  const [borrowers, setBorrowers] = useState([
+    {
+      id: "1",
+      constitution: "",
+      formData: {},
+      documents: {},
+    },
+  ])
 
   // Facilities
   const [facilities, setFacilities] = useState([{ id: "1", type: "", amount: "", documents: [] }])
 
   // Documents and dates
-  const [originalSanctionLetter, setOriginalSanctionLetter] = useState(null)
-  const [lastRenewalDate, setLastRenewalDate] = useState("")
-  const [npaDate, setNpaDate] = useState("")
-  const [outstanding, setOutstanding] = useState("")
+  const [originalSanction, setOriginalSanction] = useState({ number: "", date: "" })
+  const [lastRenewal, setLastRenewal] = useState({ number: "", date: "" })
+  const [vpaDate, setVpaDate] = useState("")
+  const [outstanding, setOutstanding] = useState({ outstanding: "", amount: "", date: "" })
 
-  // Guarantors
-  const [guarantors, setGuarantors] = useState([{ id: "1", constitution: "", name: "", documents: [] }])
+  // Enhanced Guarantors with constitution-specific fields
+  const [guarantors, setGuarantors] = useState([
+    {
+      id: "1",
+      constitution: "",
+      formData: {},
+      documents: {},
+    },
+  ])
+
+  // Grounds for Willful Defaulter - Net Worth Documentation
+  const [groundsForWillfulDefaulter, setGroundsForWillfulDefaulter] = useState({
+    borrowerNetWorths: [],
+    guarantorNetWorths: [],
+  })
 
   // Diversion and other sections
-  const [diversionOfFunds, setDiversionOfFunds] = useState("")
+  const [diversionOfFunds, setDiversionOfFunds] = useState({ status: "", remarks: "", documents: [] })
   const [siphoning, setSiphoning] = useState({ remarks: "", documents: [] })
   const [disposalOfAssets, setDisposalOfAssets] = useState({ remarks: "", documents: [] })
   const [failureToInfuse, setFailureToInfuse] = useState({ remarks: "", documents: [] })
@@ -70,11 +69,40 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
 
   // Helper functions
   const addBorrower = () => {
-    setBorrowers([...borrowers, { id: Date.now().toString(), constitution: "", name: "", documents: [] }])
+    const newBorrowerId = Date.now().toString()
+    setBorrowers([
+      ...borrowers,
+      {
+        id: newBorrowerId,
+        constitution: "",
+        formData: {},
+        documents: {},
+      },
+    ])
+
+    // Add corresponding net worth entry
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      borrowerNetWorths: [
+        ...prev.borrowerNetWorths,
+        {
+          id: newBorrowerId,
+          netWorthAmount: "",
+          netWorthDate: "",
+          documents: [],
+        },
+      ],
+    }))
   }
 
   const removeBorrower = (id) => {
     setBorrowers(borrowers.filter((b) => b.id !== id))
+
+    // Remove corresponding net worth entry
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      borrowerNetWorths: prev.borrowerNetWorths.filter((item) => item.id !== id),
+    }))
   }
 
   const updateBorrower = (id, field, value) => {
@@ -93,16 +121,1271 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     setFacilities(facilities.map((f) => (f.id === id ? { ...f, [field]: value } : f)))
   }
 
+  // Enhanced Guarantor functions
   const addGuarantor = () => {
-    setGuarantors([...guarantors, { id: Date.now().toString(), constitution: "", name: "", documents: [] }])
+    const newGuarantorId = Date.now().toString()
+    setGuarantors([
+      ...guarantors,
+      {
+        id: newGuarantorId,
+        constitution: "",
+        formData: {},
+        documents: {},
+      },
+    ])
+
+    // Add corresponding net worth entry
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      guarantorNetWorths: [
+        ...prev.guarantorNetWorths,
+        {
+          id: newGuarantorId,
+          netWorthAmount: "",
+          netWorthDate: "",
+          documents: [],
+        },
+      ],
+    }))
   }
 
   const removeGuarantor = (id) => {
     setGuarantors(guarantors.filter((g) => g.id !== id))
+
+    // Remove corresponding net worth entry
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      guarantorNetWorths: prev.guarantorNetWorths.filter((item) => item.id !== id),
+    }))
   }
 
   const updateGuarantor = (id, field, value) => {
     setGuarantors(guarantors.map((g) => (g.id === id ? { ...g, [field]: value } : g)))
+  }
+
+  const updateGuarantorFormData = (id, field, value) => {
+    setGuarantors(guarantors.map((g) => (g.id === id ? { ...g, formData: { ...g.formData, [field]: value } } : g)))
+  }
+
+  const updateGuarantorDocument = (id, field, files) => {
+    setGuarantors(
+      guarantors.map((g) => (g.id === id ? { ...g, documents: { ...g.documents, [field]: Array.from(files) } } : g)),
+    )
+  }
+
+  // Helper functions for Grounds for Willful Defaulter
+  const updateBorrowerNetWorth = (borrowerId, field, value) => {
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      borrowerNetWorths: prev.borrowerNetWorths.map((item) =>
+        item.id === borrowerId ? { ...item, [field]: value } : item,
+      ),
+    }))
+  }
+
+  const updateGuarantorNetWorth = (guarantorId, field, value) => {
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      guarantorNetWorths: prev.guarantorNetWorths.map((item) =>
+        item.id === guarantorId ? { ...item, [field]: value } : item,
+      ),
+    }))
+  }
+
+  const updateBorrowerNetWorthDocuments = (borrowerId, files) => {
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      borrowerNetWorths: prev.borrowerNetWorths.map((item) =>
+        item.id === borrowerId ? { ...item, documents: Array.from(files) } : item,
+      ),
+    }))
+  }
+
+  const updateGuarantorNetWorthDocuments = (guarantorId, files) => {
+    setGroundsForWillfulDefaulter((prev) => ({
+      ...prev,
+      guarantorNetWorths: prev.guarantorNetWorths.map((item) =>
+        item.id === guarantorId ? { ...item, documents: Array.from(files) } : item,
+      ),
+    }))
+  }
+
+  const getBorrowerName = (borrower) => {
+    const { formData } = borrower
+    return (
+      formData?.fullName ||
+      formData?.firmName ||
+      formData?.companyName ||
+      formData?.llpName ||
+      formData?.societyName ||
+      formData?.trustName ||
+      formData?.hufName ||
+      formData?.constitutionName ||
+      `Borrower (${borrower.constitution || "No constitution selected"})`
+    )
+  }
+
+  const getGuarantorName = (guarantor) => {
+    const { formData } = guarantor
+    return (
+      formData?.fullName ||
+      formData?.firmName ||
+      formData?.companyName ||
+      formData?.llpName ||
+      formData?.societyName ||
+      formData?.trustName ||
+      formData?.hufName ||
+      formData?.constitutionName ||
+      `Guarantor (${guarantor.constitution || "No constitution selected"})`
+    )
+  }
+
+  const renderGuarantorFields = (guarantor, guarantorIndex) => {
+    switch (guarantor.constitution.toLowerCase()) {
+      case "individual":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Full Name</label>
+              <input
+                type="text"
+                value={guarantor.formData?.fullName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "fullName", e.target.value)}
+                placeholder="Enter guarantor's full legal name"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Document of Identity
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "identityDocument", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload the official document of identity</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload the guarantee deed</small>
+            </div>
+          </div>
+        )
+
+      case "partnership":
+      case "partnership firm":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Firm</label>
+              <input
+                type="text"
+                value={guarantor.formData?.firmName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "firmName", e.target.value)}
+                placeholder="Enter the legal name of the partnership firm"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Partnership Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "partnershipDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Partnership Deed (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Partners
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolutionOfPartners", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution of all Partners (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "llp":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of LLP</label>
+              <input
+                type="text"
+                value={guarantor.formData?.llpName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "llpName", e.target.value)}
+                placeholder="Enter the legal name of the Limited Liability Partnership"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Registration Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "registrationDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Registration Deed (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Partners
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolutionOfPartners", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution of all Partners (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "huf":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of HUF</label>
+              <input
+                type="text"
+                value={guarantor.formData?.hufName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "hufName", e.target.value)}
+                placeholder="Enter the name of the Hindu Undivided Family"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Declaration of Karta
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "declarationOfKarta", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Declaration of Karta in Notarized copy (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Members
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolutionOfMembers", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution of Members (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "society":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Society</label>
+              <input
+                type="text"
+                value={guarantor.formData?.societyName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "societyName", e.target.value)}
+                placeholder="Enter the legal name of the society"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Memorandum of Society
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "societyMemorandum", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Memorandum of Society (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Society
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolutionOfSociety", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>ByLaws</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "byLaws", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload byLaws (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "trust":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Trust</label>
+              <input
+                type="text"
+                value={guarantor.formData?.trustName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "trustName", e.target.value)}
+                placeholder="Enter the legal name of the trust"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Trust Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "trustDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Trust Deed (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Resolution</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolutionOfTrust", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Permission of Commissioner
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "permissionOfTrust", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Permission of Commissioner of Trust (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "company":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Company</label>
+              <input
+                type="text"
+                value={guarantor.formData?.companyName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "companyName", e.target.value)}
+                placeholder="Enter the legal name of the company"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Memorandum of Association
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "associationMemorandum", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Memorandum of Association (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Article of Association
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "articleOfAssociation", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Article of Association (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Resolution</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolution", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      case "other":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Name of Constitution
+              </label>
+              <input
+                type="text"
+                value={guarantor.formData?.constitutionName || ""}
+                onChange={(e) => updateGuarantorFormData(guarantor.id, "constitutionName", e.target.value)}
+                placeholder="Enter the name of the entity"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Document of Establishment
+              </label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "establishment", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Document of Establishment (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Resolution</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "resolution", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Resolution (PDF only)</small>
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Guarantee Deed</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => updateGuarantorDocument(guarantor.id, "guaranteeDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      default:
+        return (
+          <div style={{ padding: "1rem", textAlign: "center", color: "#6b7280" }}>
+            Please select a guarantor constitution to continue
+          </div>
+        )
+    }
+  }
+
+  const renderBorrowerFields = (borrower, borrowerIndex) => {
+    const updateBorrowerFormData = (field, value) => {
+      updateBorrower(borrower.id, "formData", { ...borrower.formData, [field]: value })
+    }
+
+    const updateBorrowerDocument = (field, files) => {
+      updateBorrower(borrower.id, "documents", { ...borrower.documents, [field]: Array.from(files) })
+    }
+
+    switch (borrower.constitution) {
+      case "individual":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Full Name</label>
+              <input
+                type="text"
+                value={borrower.formData?.fullName || ""}
+                onChange={(e) => updateBorrowerFormData("fullName", e.target.value)}
+                placeholder="Enter borrower's full legal name"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Identity Document</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("identityDocument", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "partnership":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Firm</label>
+              <input
+                type="text"
+                value={borrower.formData?.firmName || ""}
+                onChange={(e) => updateBorrowerFormData("firmName", e.target.value)}
+                placeholder="Enter the legal name of the partnership firm"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Partnership Deed</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("partnershipDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Letter of Partnership
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("letterOfPartnership", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "llp":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of LLP</label>
+              <input
+                type="text"
+                value={borrower.formData?.llpName || ""}
+                onChange={(e) => updateBorrowerFormData("llpName", e.target.value)}
+                placeholder="Enter the legal name of the Limited Liability Partnership"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Registration Deed</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("registrationDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Partnership Authority Letter
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("partnershipAuthority", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "company":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Company</label>
+              <input
+                type="text"
+                value={borrower.formData?.companyName || ""}
+                onChange={(e) => updateBorrowerFormData("companyName", e.target.value)}
+                placeholder="Enter the legal name of the company"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Memorandum of Association
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("memorandumOfAssociation", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Articles of Association
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("articlesOfAssociation", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Board Resolution</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("boardResolution", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "society":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Society</label>
+              <input
+                type="text"
+                value={borrower.formData?.societyName || ""}
+                onChange={(e) => updateBorrowerFormData("societyName", e.target.value)}
+                placeholder="Enter the legal name of the society"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Memorandum of Society
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("societyMemorandum", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>ByLaws</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("byLaws", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Society
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("resolutionOfSociety", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "trust":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of Trust</label>
+              <input
+                type="text"
+                value={borrower.formData?.trustName || ""}
+                onChange={(e) => updateBorrowerFormData("trustName", e.target.value)}
+                placeholder="Enter the legal name of the trust"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Trust Deed</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("trustDeed", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Resolution of Trust</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("resolutionOfTrust", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Permission of Commissioner of Trust
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("permissionOfTrust", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "huf":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name of HUF</label>
+              <input
+                type="text"
+                value={borrower.formData?.hufName || ""}
+                onChange={(e) => updateBorrowerFormData("hufName", e.target.value)}
+                placeholder="Enter the name of the Hindu Undivided Family"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Declaration of Karta
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("declarationOfKarta", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Resolution of Members
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("resolutionOfMembers", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+          </div>
+        )
+
+      case "other":
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Name of Constitution
+              </label>
+              <input
+                type="text"
+                value={borrower.formData?.constitutionName || ""}
+                onChange={(e) => updateBorrowerFormData("constitutionName", e.target.value)}
+                placeholder="Enter the name of the entity"
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                Document of Establishment
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("establishment", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Resolution</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("resolution", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Other Documents</label>
+              <input
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={(e) => updateBorrowerDocument("otherDocs", e.target.files)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                }}
+              />
+              <small style={{ color: "#6b7280" }}>Upload Other Documents (PDF only)</small>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -127,11 +1410,12 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
         zone,
         borrowers,
         facilities,
-        originalSanctionLetter,
-        lastRenewalDate,
-        npaDate,
+        originalSanction,
+        lastRenewal,
+        vpaDate,
         outstanding,
-        guarantors,
+        guarantors, // Now includes enhanced guarantor data
+        groundsForWillfulDefaulter, // Add this new field
         diversionOfFunds,
         siphoning,
         disposalOfAssets,
@@ -156,11 +1440,6 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
       setTimeout(() => {
         history.push("/dashboard") // Redirect to your existing dashboard
       }, 2000) // 2 second delay to show success message
-
-      // Reset form after successful submission
-      // setTimeout(() => {
-      //   window.location.reload()
-      // }, 3000)
     } catch (error) {
       console.error("Submission error:", error)
       setSubmitStatus({
@@ -181,11 +1460,12 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
         zone,
         borrowers,
         facilities,
-        originalSanctionLetter,
-        lastRenewalDate,
-        npaDate,
+        originalSanction,
+        lastRenewal,
+        vpaDate,
         outstanding,
         guarantors,
+        groundsForWillfulDefaulter, // Add this new field
         diversionOfFunds,
         siphoning,
         disposalOfAssets,
@@ -209,6 +1489,29 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     }
   }
 
+  useEffect(() => {
+    // Initialize borrower net worths
+    const initialBorrowerNetWorths = borrowers.map((borrower) => ({
+      id: borrower.id,
+      netWorthAmount: "",
+      netWorthDate: "",
+      documents: [],
+    }))
+
+    // Initialize guarantor net worths
+    const initialGuarantorNetWorths = guarantors.map((guarantor) => ({
+      id: guarantor.id,
+      netWorthAmount: "",
+      netWorthDate: "",
+      documents: [],
+    }))
+
+    setGroundsForWillfulDefaulter({
+      borrowerNetWorths: initialBorrowerNetWorths,
+      guarantorNetWorths: initialGuarantorNetWorths,
+    })
+  }, []) // Only run on mount
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", padding: "2rem 0" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
@@ -216,7 +1519,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
           <div style={{ padding: "1.5rem", borderBottom: "1px solid #e5e7eb" }}>
             <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", margin: "0 0 0.5rem 0" }}>Willful Defaulter Module</h1>
             <p style={{ color: "#6b7280", margin: 0 }}>
-              Complete the form below to process willful defaulter documentation
+              Complete the form below to process willful defaulter documentation with enhanced guarantor details
             </p>
           </div>
           <div style={{ padding: "1.5rem" }}>
@@ -312,7 +1615,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
 
               <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
 
-              {/* Borrowers Section */}
+              {/* Enhanced Borrowers Section */}
               <div>
                 <div
                   style={{
@@ -351,85 +1654,61 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   >
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                        gap: "1rem",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "1rem",
                       }}
                     >
-                      <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                          Constitution
-                        </label>
-                        <select
-                          value={borrower.constitution}
-                          onChange={(e) => updateBorrower(borrower.id, "constitution", e.target.value)}
+                      <h4 style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>Borrower {index + 1}</h4>
+                      {borrowers.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeBorrower(borrower.id)}
                           style={{
-                            width: "100%",
                             padding: "0.5rem",
-                            border: "1px solid #d1d5db",
+                            backgroundColor: "#ef4444",
+                            color: "white",
+                            border: "none",
                             borderRadius: "4px",
-                            fontSize: "0.875rem",
+                            cursor: "pointer",
                           }}
                         >
-                          <option value="">Select constitution</option>
-                          {constitutionTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name</label>
-                        <input
-                          type="text"
-                          value={borrower.name}
-                          onChange={(e) => updateBorrower(borrower.id, "name", e.target.value)}
-                          placeholder="Enter borrower name"
-                          style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            border: "1px solid #d1d5db",
-                            borderRadius: "4px",
-                            fontSize: "0.875rem",
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Documents</label>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <input
-                            type="file"
-                            multiple
-                            accept=".pdf"
-                            onChange={(e) => updateBorrower(borrower.id, "documents", Array.from(e.target.files || []))}
-                            style={{
-                              flex: 1,
-                              padding: "0.5rem",
-                              border: "1px solid #d1d5db",
-                              borderRadius: "4px",
-                              fontSize: "0.875rem",
-                            }}
-                          />
-                          {borrowers.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeBorrower(borrower.id)}
-                              style={{
-                                padding: "0.5rem",
-                                backgroundColor: "#ef4444",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                          ✕ Remove
+                        </button>
+                      )}
                     </div>
+
+                    {/* Constitution Selection */}
+                    <div style={{ marginBottom: "1rem" }}>
+                      <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                        Constitution
+                      </label>
+                      <select
+                        value={borrower.constitution}
+                        onChange={(e) => updateBorrower(borrower.id, "constitution", e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.5rem",
+                          border: "1px solid #d1d5db",
+                          borderRadius: "4px",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        <option value="">Select constitution</option>
+                        <option value="individual">Individual</option>
+                        <option value="partnership">Partnership Firm</option>
+                        <option value="llp">Limited Liability Partnership (LLP)</option>
+                        <option value="society">Society</option>
+                        <option value="trust">Trust</option>
+                        <option value="huf">Hindu Undivided Family (HUF)</option>
+                        <option value="company">Company</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Constitution-specific fields */}
+                    {borrower.constitution && renderBorrowerFields(borrower, index)}
                   </div>
                 ))}
               </div>
@@ -452,6 +1731,12 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                     onClick={addFacility}
                     style={{
                       padding: "0.5rem 1rem",
+                      backgroundColor: "#3b82f6",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "0.875rem",
                       backgroundColor: "#3b82f6",
                       color: "white",
                       border: "none",
@@ -566,12 +1851,13 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
               >
                 <div>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                    Original Sanction Letter
+                    Original Sanction Number
                   </label>
                   <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => setOriginalSanctionLetter(e.target.files?.[0] || null)}
+                    type="text"
+                    value={originalSanction.number}
+                    onChange={(e) => setOriginalSanction({ ...originalSanction, number: e.target.value })}
+                    placeholder="Enter sanction number"
                     style={{
                       width: "100%",
                       padding: "0.5rem",
@@ -582,10 +1868,64 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Outstanding</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                    Original Sanction Date
+                  </label>
+                  <input
+                    type="date"
+                    value={originalSanction.date}
+                    onChange={(e) => setOriginalSanction({ ...originalSanction, date: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "4px",
+                      fontSize: "0.875rem",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                    Last Renewal Number
+                  </label>
+                  <input
+                    type="text"
+                    value={lastRenewal.number}
+                    onChange={(e) => setLastRenewal({ ...lastRenewal, number: e.target.value })}
+                    placeholder="Enter renewal number"
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "4px",
+                      fontSize: "0.875rem",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                    Last Renewal Date
+                  </label>
+                  <input
+                    type="date"
+                    value={lastRenewal.date}
+                    onChange={(e) => setLastRenewal({ ...lastRenewal, date: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "4px",
+                      fontSize: "0.875rem",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                    Outstanding Type
+                  </label>
                   <select
-                    value={outstanding}
-                    onChange={(e) => setOutstanding(e.target.value)}
+                    value={outstanding.outstanding}
+                    onChange={(e) => setOutstanding({ ...outstanding, outstanding: e.target.value })}
                     style={{
                       width: "100%",
                       padding: "0.5rem",
@@ -594,7 +1934,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                       fontSize: "0.875rem",
                     }}
                   >
-                    <option value="">Select outstanding type</option>
+                    <option value="">Select outstanding</option>
                     {creditFacilities.map((type) => (
                       <option key={type} value={type}>
                         {type}
@@ -604,12 +1944,13 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 </div>
                 <div>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                    Last Renewal Date
+                    Outstanding Amount
                   </label>
                   <input
-                    type="date"
-                    value={lastRenewalDate}
-                    onChange={(e) => setLastRenewalDate(e.target.value)}
+                    type="text"
+                    value={outstanding.amount}
+                    onChange={(e) => setOutstanding({ ...outstanding, amount: e.target.value })}
+                    placeholder="Enter amount"
                     style={{
                       width: "100%",
                       padding: "0.5rem",
@@ -620,11 +1961,28 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>NPA Date</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                    Outstanding Date
+                  </label>
                   <input
                     type="date"
-                    value={npaDate}
-                    onChange={(e) => setNpaDate(e.target.value)}
+                    value={outstanding.date}
+                    onChange={(e) => setOutstanding({ ...outstanding, date: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "4px",
+                      fontSize: "0.875rem",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>VPA Date</label>
+                  <input
+                    type="date"
+                    value={vpaDate}
+                    onChange={(e) => setVpaDate(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "0.5rem",
@@ -638,7 +1996,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
 
               <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
 
-              {/* Guarantors Section */}
+              {/* Enhanced Guarantors Section */}
               <div>
                 <div
                   style={{
@@ -648,7 +2006,9 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                     marginBottom: "1rem",
                   }}
                 >
-                  <h3 style={{ fontSize: "1.125rem", fontWeight: "600", margin: 0 }}>Guarantor(s)</h3>
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: "600", margin: 0 }}>
+                    Guarantor(s) - Enhanced Details
+                  </h3>
                   <button
                     type="button"
                     onClick={addGuarantor}
@@ -665,53 +2025,373 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                     + Add Guarantor
                   </button>
                 </div>
-                {guarantors.map((guarantor) => (
+                {guarantors.map((guarantor, index) => (
                   <div
                     key={guarantor.id}
                     style={{
-                      padding: "1rem",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "6px",
-                      marginBottom: "1rem",
+                      padding: "1.5rem",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "8px",
+                      marginBottom: "1.5rem",
+                      backgroundColor: "#fafafa",
                     }}
                   >
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                        gap: "1rem",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "1rem",
                       }}
                     >
+                      <h4 style={{ fontSize: "1.1rem", fontWeight: "600", margin: 0, color: "#374151" }}>
+                        Guarantor {index + 1}
+                      </h4>
+                      {guarantors.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeGuarantor(guarantor.id)}
+                          style={{
+                            padding: "0.5rem 1rem",
+                            backgroundColor: "#ef4444",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          ✕ Remove Guarantor
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Constitution Selection */}
+                    <div style={{ marginBottom: "1.5rem" }}>
+                      <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500", fontSize: "1rem" }}>
+                        Guarantor Constitution Type
+                      </label>
+                      <select
+                        value={guarantor.constitution}
+                        onChange={(e) => updateGuarantor(guarantor.id, "constitution", e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.75rem",
+                          border: "2px solid #d1d5db",
+                          borderRadius: "6px",
+                          fontSize: "0.875rem",
+                          backgroundColor: "white",
+                        }}
+                      >
+                        <option value="">Select guarantor constitution type</option>
+                        <option value="individual">Individual</option>
+                        <option value="partnership">Partnership Firm</option>
+                        <option value="llp">Limited Liability Partnership (LLP)</option>
+                        <option value="society">Society</option>
+                        <option value="trust">Trust</option>
+                        <option value="huf">Hindu Undivided Family (HUF)</option>
+                        <option value="company">Company</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Constitution-specific fields */}
+                    {guarantor.constitution && (
+                      <div
+                        style={{
+                          backgroundColor: "white",
+                          padding: "1rem",
+                          borderRadius: "6px",
+                          border: "1px solid #e5e7eb",
+                        }}
+                      >
+                        <h5 style={{ fontSize: "1rem", fontWeight: "500", marginBottom: "1rem", color: "#374151" }}>
+                          {guarantor.constitution.charAt(0).toUpperCase() + guarantor.constitution.slice(1)} Details
+                        </h5>
+                        {renderGuarantorFields(guarantor, index)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
+
+              {/* Grounds for Willful Defaulter - Net Worth Section */}
+              <div>
+                <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "1rem", color: "#374151" }}>
+                  Grounds for Willful Defaulter - Net Worth Documentation
+                </h3>
+                <p style={{ color: "#6b7280", marginBottom: "1.5rem", fontSize: "0.875rem" }}>
+                  Provide net worth information and supporting documents for all borrowers and guarantors
+                </p>
+
+                {/* Borrowers Net Worth */}
+                <div style={{ marginBottom: "2rem" }}>
+                  <h4 style={{ fontSize: "1rem", fontWeight: "500", marginBottom: "1rem", color: "#4b5563" }}>
+                    Borrowers Net Worth
+                  </h4>
+                  {borrowers.map((borrower, index) => {
+                    const netWorthData = groundsForWillfulDefaulter.borrowerNetWorths.find(
+                      (item) => item.id === borrower.id,
+                    ) || { netWorthAmount: "", netWorthDate: "", documents: [] }
+
+                    return (
+                      <div
+                        key={borrower.id}
+                        style={{
+                          padding: "1rem",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "6px",
+                          marginBottom: "1rem",
+                          backgroundColor: "#f9fafb",
+                        }}
+                      >
+                        <h5 style={{ fontSize: "0.875rem", fontWeight: "500", marginBottom: "1rem", color: "#374151" }}>
+                          Borrower {index + 1}: {getBorrowerName(borrower)}
+                        </h5>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                            gap: "1rem",
+                          }}
+                        >
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Amount (₹)
+                            </label>
+                            <input
+                              type="text"
+                              value={netWorthData.netWorthAmount}
+                              onChange={(e) => updateBorrowerNetWorth(borrower.id, "netWorthAmount", e.target.value)}
+                              placeholder="Enter net worth amount"
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Assessment Date
+                            </label>
+                            <input
+                              type="date"
+                              value={netWorthData.netWorthDate}
+                              onChange={(e) => updateBorrowerNetWorth(borrower.id, "netWorthDate", e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Documents
+                            </label>
+                            <input
+                              type="file"
+                              multiple
+                              accept=".pdf"
+                              onChange={(e) => updateBorrowerNetWorthDocuments(borrower.id, e.target.files)}
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                            <small style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+                              Upload financial statements, balance sheets, or net worth certificates (PDF only)
+                            </small>
+                            {netWorthData.documents && netWorthData.documents.length > 0 && (
+                              <div style={{ marginTop: "0.5rem" }}>
+                                <small style={{ color: "#059669", fontSize: "0.75rem" }}>
+                                  {netWorthData.documents.length} file(s) selected
+                                </small>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Guarantors Net Worth */}
+                <div>
+                  <h4 style={{ fontSize: "1rem", fontWeight: "500", marginBottom: "1rem", color: "#4b5563" }}>
+                    Guarantors Net Worth
+                  </h4>
+                  {guarantors.map((guarantor, index) => {
+                    const netWorthData = groundsForWillfulDefaulter.guarantorNetWorths.find(
+                      (item) => item.id === guarantor.id,
+                    ) || { netWorthAmount: "", netWorthDate: "", documents: [] }
+
+                    return (
+                      <div
+                        key={guarantor.id}
+                        style={{
+                          padding: "1rem",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "6px",
+                          marginBottom: "1rem",
+                          backgroundColor: "#f9fafb",
+                        }}
+                      >
+                        <h5 style={{ fontSize: "0.875rem", fontWeight: "500", marginBottom: "1rem", color: "#374151" }}>
+                          Guarantor {index + 1}: {getGuarantorName(guarantor)}
+                        </h5>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                            gap: "1rem",
+                          }}
+                        >
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Amount (₹)
+                            </label>
+                            <input
+                              type="text"
+                              value={netWorthData.netWorthAmount}
+                              onChange={(e) => updateGuarantorNetWorth(guarantor.id, "netWorthAmount", e.target.value)}
+                              placeholder="Enter net worth amount"
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Assessment Date
+                            </label>
+                            <input
+                              type="date"
+                              value={netWorthData.netWorthDate}
+                              onChange={(e) => updateGuarantorNetWorth(guarantor.id, "netWorthDate", e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                              Net Worth Documents
+                            </label>
+                            <input
+                              type="file"
+                              multiple
+                              accept=".pdf"
+                              onChange={(e) => updateGuarantorNetWorthDocuments(guarantor.id, e.target.files)}
+                              style={{
+                                width: "100%",
+                                padding: "0.5rem",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                              }}
+                            />
+                            <small style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+                              Upload financial statements, balance sheets, or net worth certificates (PDF only)
+                            </small>
+                            {netWorthData.documents && netWorthData.documents.length > 0 && (
+                              <div style={{ marginTop: "0.5rem" }}>
+                                <small style={{ color: "#059669", fontSize: "0.75rem" }}>
+                                  {netWorthData.documents.length} file(s) selected
+                                </small>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
+
+              {/* Enhanced Diversion of Funds */}
+              <div>
+                <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "1rem" }}>Diversion of Funds</h3>
+                <div
+                  style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}
+                >
+                  <div>
+                    <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                      Diversion Status
+                    </label>
+                    <select
+                      value={diversionOfFunds.status}
+                      onChange={(e) => setDiversionOfFunds({ ...diversionOfFunds, status: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "4px",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      <option value="">Select diversion status</option>
+                      {diversionOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {diversionOfFunds.status && (
+                    <>
                       <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                          Constitution
-                        </label>
-                        <select
-                          value={guarantor.constitution}
-                          onChange={(e) => updateGuarantor(guarantor.id, "constitution", e.target.value)}
+                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Remarks</label>
+                        <textarea
+                          value={diversionOfFunds.remarks}
+                          onChange={(e) => setDiversionOfFunds({ ...diversionOfFunds, remarks: e.target.value })}
+                          placeholder={`Enter remarks about diversion of funds - ${diversionOfFunds.status}`}
+                          rows={4}
                           style={{
                             width: "100%",
                             padding: "0.5rem",
                             border: "1px solid #d1d5db",
                             borderRadius: "4px",
                             fontSize: "0.875rem",
+                            resize: "vertical",
                           }}
-                        >
-                          <option value="">Select constitution</option>
-                          {constitutionTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
+                        />
+                        <small style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+                          Provide detailed remarks for the selected diversion status
+                        </small>
                       </div>
                       <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name</label>
+                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                          Supporting Documents
+                        </label>
                         <input
-                          type="text"
-                          value={guarantor.name}
-                          onChange={(e) => updateGuarantor(guarantor.id, "name", e.target.value)}
-                          placeholder="Enter guarantor name"
+                          type="file"
+                          multiple
+                          accept=".pdf"
+                          onChange={(e) =>
+                            setDiversionOfFunds({ ...diversionOfFunds, documents: Array.from(e.target.files || []) })
+                          }
                           style={{
                             width: "100%",
                             padding: "0.5rem",
@@ -720,73 +2400,20 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                             fontSize: "0.875rem",
                           }}
                         />
+                        <small style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+                          Upload supporting documents for diversion of funds (PDF only)
+                        </small>
+                        {diversionOfFunds.documents.length > 0 && (
+                          <div style={{ marginTop: "0.5rem" }}>
+                            <small style={{ color: "#059669", fontSize: "0.75rem" }}>
+                              {diversionOfFunds.documents.length} file(s) selected
+                            </small>
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Documents</label>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <input
-                            type="file"
-                            multiple
-                            accept=".pdf"
-                            onChange={(e) =>
-                              updateGuarantor(guarantor.id, "documents", Array.from(e.target.files || []))
-                            }
-                            style={{
-                              flex: 1,
-                              padding: "0.5rem",
-                              border: "1px solid #d1d5db",
-                              borderRadius: "4px",
-                              fontSize: "0.875rem",
-                            }}
-                          />
-                          {guarantors.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeGuarantor(guarantor.id)}
-                              style={{
-                                padding: "0.5rem",
-                                backgroundColor: "#ef4444",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
-
-              {/* Diversion of Funds */}
-              <div>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                  Diversion of Funds
-                </label>
-                <select
-                  value={diversionOfFunds}
-                  onChange={(e) => setDiversionOfFunds(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "0.5rem",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "4px",
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  <option value="">Select diversion status</option>
-                  {diversionOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                    </>
+                  )}
+                </div>
               </div>
 
               <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
