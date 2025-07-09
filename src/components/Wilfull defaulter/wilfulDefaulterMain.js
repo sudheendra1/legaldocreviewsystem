@@ -5,21 +5,23 @@ import { saveWillfulDefaulterData, saveWillfulDefaulterDraft } from "../../utils
 import { useAuth } from "../../contexts/AuthContext"
 import { useHistory } from "react-router-dom"
 
-// Credit facilities list - simplified to only two options
 const creditFacilities = ["Cash Credit", "Term Loan"]
 
 const constitutionTypes = ["Individual", "Partnership firm", "LLP", "Trust", "HUF", "Society", "Company", "Other"]
 
-const diversionOptions = ["Yes - Confirmed", "No - Not Found", "Under Investigation", "Suspected", "Partial Diversion"]
+const diversionOptions = ["utilisation of short-term working capital funds for long-term purposes not in conformity with the terms of sanction of credit facility",
+   "deploying funds availed using credit facility for the creation of assets other than those for which the credit was sanctioned", 
+   "transferring funds availed using credit facility to the subsidiaries/group companies or other entities, by whatever modality, without approval of the lender/  all the lenders in the consortium", 
+   "routing of funds through any lender other than the lender or members of consortium without prior written permission of the lender or all the lenders of consortium", 
+   "investing funds availed using credit facility in other companies/entities by way of acquiring equities/debt instruments without the approval of lender or all the lenders of consortium",
+  "shortfall in the deployment of funds vis-à-vis the amounts disbursed/ drawn under the credit facility and the difference not being accounted for"]
 
 export default function WillfulDefaulterForm({ userId = "default-user", bankId = "default-bank" }) {
-  // Basic form fields
   const [branchName, setBranchName] = useState("")
   const [branchId, setBranchId] = useState("")
   const [region, setRegion] = useState("")
   const [zone, setZone] = useState("")
 
-  // Borrowers
   const [borrowers, setBorrowers] = useState([
     {
       id: "1",
@@ -29,16 +31,13 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     },
   ])
 
-  // Facilities
   const [facilities, setFacilities] = useState([{ id: "1", type: "", amount: "", documents: [] }])
 
-  // Documents and dates
   const [originalSanction, setOriginalSanction] = useState({ number: "", date: "" })
   const [lastRenewal, setLastRenewal] = useState({ number: "", date: "" })
-  const [vpaDate, setVpaDate] = useState("")
+  const [npaDate, setNpaDate] = useState("")
   const [outstanding, setOutstanding] = useState({ outstanding: "", amount: "", date: "" })
 
-  // Enhanced Guarantors with constitution-specific fields
   const [guarantors, setGuarantors] = useState([
     {
       id: "1",
@@ -48,26 +47,25 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     },
   ])
 
-  // Grounds for Willful Defaulter - Net Worth Documentation
   const [groundsForWillfulDefaulter, setGroundsForWillfulDefaulter] = useState({
     borrowerNetWorths: [],
     guarantorNetWorths: [],
   })
 
-  // Diversion and other sections
+  
   const [diversionOfFunds, setDiversionOfFunds] = useState({ status: "", remarks: "", documents: [] })
   const [siphoning, setSiphoning] = useState({ remarks: "", documents: [] })
   const [disposalOfAssets, setDisposalOfAssets] = useState({ remarks: "", documents: [] })
   const [failureToInfuse, setFailureToInfuse] = useState({ remarks: "", documents: [] })
 
-  // UI states
+  
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
 
   const { currentUser } = useAuth()
   const history = useHistory()
 
-  // Helper functions
+  
   const addBorrower = () => {
     const newBorrowerId = Date.now().toString()
     setBorrowers([
@@ -80,7 +78,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
       },
     ])
 
-    // Add corresponding net worth entry
+    
     setGroundsForWillfulDefaulter((prev) => ({
       ...prev,
       borrowerNetWorths: [
@@ -98,7 +96,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
   const removeBorrower = (id) => {
     setBorrowers(borrowers.filter((b) => b.id !== id))
 
-    // Remove corresponding net worth entry
+    
     setGroundsForWillfulDefaulter((prev) => ({
       ...prev,
       borrowerNetWorths: prev.borrowerNetWorths.filter((item) => item.id !== id),
@@ -121,7 +119,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     setFacilities(facilities.map((f) => (f.id === id ? { ...f, [field]: value } : f)))
   }
 
-  // Enhanced Guarantor functions
+
   const addGuarantor = () => {
     const newGuarantorId = Date.now().toString()
     setGuarantors([
@@ -134,7 +132,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
       },
     ])
 
-    // Add corresponding net worth entry
+    
     setGroundsForWillfulDefaulter((prev) => ({
       ...prev,
       guarantorNetWorths: [
@@ -152,7 +150,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
   const removeGuarantor = (id) => {
     setGuarantors(guarantors.filter((g) => g.id !== id))
 
-    // Remove corresponding net worth entry
+  
     setGroundsForWillfulDefaulter((prev) => ({
       ...prev,
       guarantorNetWorths: prev.guarantorNetWorths.filter((item) => item.id !== id),
@@ -173,7 +171,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
     )
   }
 
-  // Helper functions for Grounds for Willful Defaulter
+  
   const updateBorrowerNetWorth = (borrowerId, field, value) => {
     setGroundsForWillfulDefaulter((prev) => ({
       ...prev,
@@ -1412,7 +1410,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
         facilities,
         originalSanction,
         lastRenewal,
-        vpaDate,
+        npaDate,
         outstanding,
         guarantors, // Now includes enhanced guarantor data
         groundsForWillfulDefaulter, // Add this new field
@@ -1462,7 +1460,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
         facilities,
         originalSanction,
         lastRenewal,
-        vpaDate,
+        npaDate,
         outstanding,
         guarantors,
         groundsForWillfulDefaulter, // Add this new field
@@ -1978,11 +1976,11 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>VPA Date</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>NPA Date</label>
                   <input
                     type="date"
-                    value={vpaDate}
-                    onChange={(e) => setVpaDate(e.target.value)}
+                    value={npaDate}
+                    onChange={(e) => setNpaDate(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "0.5rem",
