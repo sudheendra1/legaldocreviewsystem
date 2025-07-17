@@ -22,14 +22,14 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
   const [region, setRegion] = useState("")
   const [zone, setZone] = useState("")
 
-  const [borrowers, setBorrowers] = useState([
-    {
-      id: "1",
-      constitution: "",
-      formData: {},
-      documents: {},
-    },
-  ])
+  // const [borrowers, setBorrowers] = useState([
+  //   {
+  //     id: "1",
+  //     constitution: "",
+  //     formData: {},
+  //     documents: {},
+  //   },
+  // ])
 
   const [facilities, setFacilities] = useState([{ id: "1", type: "", amount: "", documents: [] }])
 
@@ -38,20 +38,35 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
   const [npaDate, setNpaDate] = useState("")
   const [outstanding, setOutstanding] = useState({ outstanding: "", amount: "", date: "" })
 
-  const [guarantors, setGuarantors] = useState([
-    {
-      id: "1",
-      constitution: "",
-      formData: {},
-      documents: {},
-    },
-  ])
+  // const [guarantors, setGuarantors] = useState([
+  //   {
+  //     id: "1",
+  //     constitution: "",
+  //     formData: {},
+  //     documents: {},
+  //   },
+  // ])
 
   const [groundsForWillfulDefaulter, setGroundsForWillfulDefaulter] = useState({
     borrowerNetWorths: [],
     guarantorNetWorths: [],
   })
 
+  const [borrowers, setBorrowers] = useState([{ id: "1", name: "" }])
+
+const handleBorrowerChange = (index, value) => {
+  const updated = [...borrowers]
+  updated[index].name = value
+  setBorrowers(updated)
+}
+
+const [guarantors, setGuarantors] = useState([{ id: "1", name: "" }])
+
+const handleGuarantorChange = (index, value) => {
+  const updated = [...guarantors]
+  updated[index].name = value
+  setGuarantors(updated)
+}
   
   const [diversionOfFunds, setDiversionOfFunds] = useState({ status: "", remarks: "", documents: [] })
   const [siphoning, setSiphoning] = useState({ remarks: "", documents: [] })
@@ -64,6 +79,17 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
 
   const { currentUser } = useAuth()
   const history = useHistory()
+
+
+  const [diversionDetails, setDiversionDetails] = useState(
+  diversionOptions.map(option => ({ option, remarks: "", documents: [] }))
+)
+
+const handleDiversionChange = (index, field, value) => {
+  const updated = [...diversionDetails]
+  updated[index][field] = value
+  setDiversionDetails(updated)
+}
 
   
   const addBorrower = () => {
@@ -259,7 +285,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Document of Identity
               </label>
@@ -294,7 +320,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload the guarantee deed</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -318,7 +344,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Partnership Deed</label>
               <input
                 type="file"
@@ -367,7 +393,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -390,7 +416,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Registration Deed</label>
               <input
                 type="file"
@@ -439,7 +465,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -462,7 +488,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Declaration of Karta
               </label>
@@ -513,7 +539,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -536,7 +562,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Memorandum of Society
               </label>
@@ -603,7 +629,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload byLaws (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -626,7 +652,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Trust Deed</label>
               <input
                 type="file"
@@ -691,7 +717,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Permission of Commissioner of Trust (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -714,7 +740,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Memorandum of Association
               </label>
@@ -781,7 +807,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -806,7 +832,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Document of Establishment
               </label>
@@ -855,7 +881,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Guarantee Deed (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -897,7 +923,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Identity Document</label>
               <input
                 type="file"
@@ -912,7 +938,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -935,7 +961,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Partnership Deed</label>
               <input
                 type="file"
@@ -968,7 +994,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -991,7 +1017,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Registration Deed</label>
               <input
                 type="file"
@@ -1024,7 +1050,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1047,7 +1073,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Memorandum of Association
               </label>
@@ -1098,7 +1124,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1121,7 +1147,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Memorandum of Society
               </label>
@@ -1172,7 +1198,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1195,7 +1221,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Trust Deed</label>
               <input
                 type="file"
@@ -1244,7 +1270,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1267,7 +1293,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Declaration of Karta
               </label>
@@ -1302,7 +1328,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   fontSize: "0.875rem",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1327,7 +1353,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
             </div>
-            <div>
+            {/* <div>
               <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                 Document of Establishment
               </label>
@@ -1377,7 +1403,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                 }}
               />
               <small style={{ color: "#6b7280" }}>Upload Other Documents (PDF only)</small>
-            </div>
+            </div> */}
           </div>
         )
 
@@ -1508,7 +1534,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
       borrowerNetWorths: initialBorrowerNetWorths,
       guarantorNetWorths: initialGuarantorNetWorths,
     })
-  }, []) // Only run on mount
+  }, []) 
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", padding: "2rem 0" }}>
@@ -2132,7 +2158,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   {borrowers.map((borrower, index) => {
                     const netWorthData = groundsForWillfulDefaulter.borrowerNetWorths.find(
                       (item) => item.id === borrower.id,
-                    ) || { netWorthAmount: "", netWorthDate: "", documents: [] }
+                    ) || { netWorthAmount: "", netWorthDate: "", documents: [] ,remarks :""}
 
                     return (
                       <div
@@ -2190,6 +2216,22 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                               }}
                             />
                           </div>
+                          <div style={{ marginBottom: "0.75rem" }}>
+        <label style={{ display: "block", fontWeight: "500", marginBottom: "0.25rem" }}>Remarks</label>
+        <textarea
+          rows="3"
+          value={netWorthData.remarks}
+          onChange={(e) => updateBorrowerNetWorth(borrower.id, "remarks", e.target.value)}
+          placeholder="Enter remarks"
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "4px",
+            fontSize: "0.875rem"
+          }}
+        ></textarea>
+      </div>
                           <div>
                             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                               Net Worth Documents
@@ -2232,7 +2274,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                   {guarantors.map((guarantor, index) => {
                     const netWorthData = groundsForWillfulDefaulter.guarantorNetWorths.find(
                       (item) => item.id === guarantor.id,
-                    ) || { netWorthAmount: "", netWorthDate: "", documents: [] }
+                    ) || { netWorthAmount: "", netWorthDate: "", documents: [],remarks:"" }
 
                     return (
                       <div
@@ -2290,6 +2332,22 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                               }}
                             />
                           </div>
+                          <div style={{ marginBottom: "0.75rem" }}>
+        <label style={{ display: "block", fontWeight: "500", marginBottom: "0.25rem" }}>Remarks</label>
+        <textarea
+          rows="3"
+          value={netWorthData.remarks}
+          onChange={(e) => updateGuarantorNetWorth(guarantor.id, "remarks", e.target.value)}
+          placeholder="Enter remarks"
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "4px",
+            fontSize: "0.875rem"
+          }}
+        ></textarea>
+      </div>
                           <div>
                             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
                               Net Worth Documents
@@ -2328,7 +2386,7 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
               <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
 
               {/* Enhanced Diversion of Funds */}
-              <div>
+              {/* <div>
                 <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "1rem" }}>Diversion of Funds</h3>
                 <div
                   style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1rem" }}
@@ -2412,7 +2470,59 @@ export default function WillfulDefaulterForm({ userId = "default-user", bankId =
                     </>
                   )}
                 </div>
-              </div>
+              </div> */}
+              <div>
+  <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "1rem" }}>
+    Diversion of Funds
+  </h3>
+  {diversionDetails.map((item, index) => (
+    <div
+      key={index}
+      style={{
+        marginBottom: "1.5rem",
+        padding: "1rem",
+        border: "1px solid #d1d5db",
+        borderRadius: "6px",
+        backgroundColor: "#f9fafb"
+      }}
+    >
+      <p style={{ fontWeight: "500", marginBottom: "0.5rem" }}>{item.option}</p>
+      <div style={{ marginBottom: "0.75rem" }}>
+        <label style={{ display: "block", fontWeight: "500", marginBottom: "0.25rem" }}>Remarks</label>
+        <textarea
+          rows="3"
+          value={item.remarks}
+          onChange={(e) => handleDiversionChange(index, "remarks", e.target.value)}
+          placeholder="Enter remarks"
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "4px",
+            fontSize: "0.875rem"
+          }}
+        ></textarea>
+      </div>
+      <div>
+        <label style={{ display: "block", fontWeight: "500", marginBottom: "0.25rem" }}>Upload Supporting Documents</label>
+        <input
+          type="file"
+          multiple
+          accept=".pdf"
+          onChange={(e) => handleDiversionChange(index, "documents", Array.from(e.target.files || []))}
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "4px",
+            fontSize: "0.875rem"
+          }}
+        />
+      </div>
+    </div>
+  ))}
+</div>
+              
 
               <hr style={{ border: "none", borderTop: "1px solid #e5e7eb" }} />
 
