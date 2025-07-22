@@ -1438,13 +1438,12 @@ const handleDiversionChange = (index, field, value) => {
         lastRenewal,
         npaDate,
         outstanding,
-        guarantors, // Now includes enhanced guarantor data
-        groundsForWillfulDefaulter, // Add this new field
-        diversionOfFunds,
+        guarantors, 
+        groundsForWillfulDefaulter, 
+        diversionDetails,
         siphoning,
         disposalOfAssets,
         failureToInfuse,
-        // Add user authentication data like in your loan documents module
         submittedBy: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "Unknown User"),
         submittedByUid: currentUser.uid,
         userId: currentUser.uid,
@@ -1489,8 +1488,8 @@ const handleDiversionChange = (index, field, value) => {
         npaDate,
         outstanding,
         guarantors,
-        groundsForWillfulDefaulter, // Add this new field
-        diversionOfFunds,
+        groundsForWillfulDefaulter, 
+        diversionDetails,
         siphoning,
         disposalOfAssets,
         failureToInfuse,

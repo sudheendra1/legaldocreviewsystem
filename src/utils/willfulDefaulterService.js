@@ -40,11 +40,20 @@
 //       console.log("Uploading borrower documents...")
 //       uploadedData.borrowers = await Promise.all(
 //         formData.borrowers.map(async (borrower) => {
-//           if (borrower.documents && borrower.documents.length > 0) {
-//             const uploadedDocs = await uploadDocumentsToS3(borrower.documents)
-//             return { ...borrower, documents: uploadedDocs }
+//           const updatedBorrower = { ...borrower }
+
+//           // Handle existing borrower documents
+//           if (borrower.documents && Object.keys(borrower.documents).length > 0) {
+//             const uploadedDocs = {}
+//             for (const [key, files] of Object.entries(borrower.documents)) {
+//               if (files && files.length > 0) {
+//                 uploadedDocs[key] = await uploadDocumentsToS3(files)
+//               }
+//             }
+//             updatedBorrower.documents = uploadedDocs
 //           }
-//           return borrower
+
+//           return updatedBorrower
 //         }),
 //       )
 //     }
@@ -68,13 +77,63 @@
 //       console.log("Uploading guarantor documents...")
 //       uploadedData.guarantors = await Promise.all(
 //         formData.guarantors.map(async (guarantor) => {
-//           if (guarantor.documents && guarantor.documents.length > 0) {
-//             const uploadedDocs = await uploadDocumentsToS3(guarantor.documents)
-//             return { ...guarantor, documents: uploadedDocs }
+//           const updatedGuarantor = { ...guarantor }
+
+//           // Handle existing guarantor documents
+//           if (guarantor.documents && Object.keys(guarantor.documents).length > 0) {
+//             const uploadedDocs = {}
+//             for (const [key, files] of Object.entries(guarantor.documents)) {
+//               if (files && files.length > 0) {
+//                 uploadedDocs[key] = await uploadDocumentsToS3(files)
+//               }
+//             }
+//             updatedGuarantor.documents = uploadedDocs
 //           }
-//           return guarantor
+
+//           return updatedGuarantor
 //         }),
 //       )
+//     }
+
+//     // NEW: Upload Grounds for Willful Defaulter - Net Worth Documents
+//     if (formData.groundsForWillfulDefaulter) {
+//       console.log("Uploading net worth documents...")
+//       const updatedGrounds = { ...formData.groundsForWillfulDefaulter }
+
+//       // Upload borrower net worth documents
+//       if (updatedGrounds.borrowerNetWorths) {
+//         updatedGrounds.borrowerNetWorths = await Promise.all(
+//           updatedGrounds.borrowerNetWorths.map(async (netWorth) => {
+//             if (netWorth.documents && netWorth.documents.length > 0) {
+//               const uploadedDocs = await uploadDocumentsToS3(netWorth.documents)
+//               return { ...netWorth, documents: uploadedDocs }
+//             }
+//             return netWorth
+//           }),
+//         )
+//       }
+
+//       // Upload guarantor net worth documents
+//       if (updatedGrounds.guarantorNetWorths) {
+//         updatedGrounds.guarantorNetWorths = await Promise.all(
+//           updatedGrounds.guarantorNetWorths.map(async (netWorth) => {
+//             if (netWorth.documents && netWorth.documents.length > 0) {
+//               const uploadedDocs = await uploadDocumentsToS3(netWorth.documents)
+//               return { ...netWorth, documents: uploadedDocs }
+//             }
+//             return netWorth
+//           }),
+//         )
+//       }
+
+//       uploadedData.groundsForWillfulDefaulter = updatedGrounds
+//     }
+
+//     // Upload diversion of funds documents
+//     if (formData.diversionOfFunds?.documents && formData.diversionOfFunds.documents.length > 0) {
+//       console.log("Uploading diversion of funds documents...")
+//       const uploadedDocs = await uploadDocumentsToS3(formData.diversionOfFunds.documents)
+//       uploadedData.diversionOfFunds = { ...formData.diversionOfFunds, documents: uploadedDocs }
 //     }
 
 //     // Upload original sanction letter
@@ -454,9 +513,23 @@ export const saveWillfulDefaulterData = async (formData) => {
       uploadedData.groundsForWillfulDefaulter = updatedGrounds
     }
 
-    // Upload diversion of funds documents
+    // FIXED: Upload NEW diversionDetails array structure
+    if (formData.diversionDetails && formData.diversionDetails.length > 0) {
+      console.log("Uploading diversion details documents...")
+      uploadedData.diversionDetails = await Promise.all(
+        formData.diversionDetails.map(async (diversionItem) => {
+          if (diversionItem.documents && diversionItem.documents.length > 0) {
+            const uploadedDocs = await uploadDocumentsToS3(diversionItem.documents)
+            return { ...diversionItem, documents: uploadedDocs }
+          }
+          return diversionItem
+        }),
+      )
+    }
+
+    // LEGACY: Upload old diversion of funds documents (for backward compatibility)
     if (formData.diversionOfFunds?.documents && formData.diversionOfFunds.documents.length > 0) {
-      console.log("Uploading diversion of funds documents...")
+      console.log("Uploading legacy diversion of funds documents...")
       const uploadedDocs = await uploadDocumentsToS3(formData.diversionOfFunds.documents)
       uploadedData.diversionOfFunds = { ...formData.diversionOfFunds, documents: uploadedDocs }
     }
@@ -495,6 +568,7 @@ export const saveWillfulDefaulterData = async (formData) => {
     uploadedData.module = "willful-defaulter"
 
     console.log("All documents uploaded successfully. Saving to Firestore...")
+    console.log("Final uploadedData structure:", JSON.stringify(uploadedData, null, 2))
 
     // Save to Firebase Firestore using the same "submissions" collection as your loan documents
     // but with module identifier to distinguish willful defaulter submissions
