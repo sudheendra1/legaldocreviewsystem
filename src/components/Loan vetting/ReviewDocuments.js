@@ -294,9 +294,9 @@
 
 import { useState, useEffect } from "react"
 import { Redirect } from "react-router-dom"
-import { db } from "../firebase/config"
+import { db } from "../../firebase/config"
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
 import {
   Button,
   Card,

@@ -21,8 +21,8 @@ import {
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
 import DescriptionIcon from "@mui/icons-material/Description"
-import SectionHeader from "./sectionHeader"
-import FileUpload from "./fileUpload"
+import SectionHeader from "../sectionHeader"
+import FileUpload from "../fileUpload"
 import { useFormData } from "./FormDataManager"
 
 function Facilities({ onNext }) {

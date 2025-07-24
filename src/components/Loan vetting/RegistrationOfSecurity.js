@@ -127,8 +127,8 @@
 
 import { useState, useEffect } from "react"
 import { Button, Box, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Alert, Divider } from "@mui/material"
-import SectionHeader from "./sectionHeader"
-import FileUpload from "./fileUpload"
+import SectionHeader from "../sectionHeader"
+import FileUpload from "../fileUpload"
 import { useFormData } from "./FormDataManager"
 
 function RegistrationOfSecurity({ onNext }) {

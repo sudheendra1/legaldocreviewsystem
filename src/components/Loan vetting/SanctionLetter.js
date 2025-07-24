@@ -119,8 +119,8 @@
 
 import { useState, useEffect } from "react"
 import { TextField, Button, Box, Paper, Grid } from "@mui/material"
-import FileUpload from "./fileUpload"
-import SectionHeader from "./sectionHeader"
+import FileUpload from "../fileUpload"
+import SectionHeader from "../sectionHeader"
 import { useFormData } from "./FormDataManager"
 
 function SanctionLetter({ onNext }) {

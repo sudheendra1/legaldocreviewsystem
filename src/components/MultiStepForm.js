@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Box, Button, Typography, Stepper, Step, StepLabel } from "@mui/material"
-import BorrowerDetails from "./BorrowerDetails"
+import BorrowerDetails from "./Loan vetting/BorrowerDetails"
 // Import other steps if needed, e.g.:
 // import LoanDetails from "./LoanDetails"
 // import DocumentUpload from "./DocumentUpload"

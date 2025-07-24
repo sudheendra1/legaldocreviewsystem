@@ -95,8 +95,8 @@ import { TextField, Button, Box, Paper, Grid, IconButton, Typography, Card, Card
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
 import DescriptionIcon from "@mui/icons-material/Description"
-import SectionHeader from "./sectionHeader"
-import FileUpload from "./fileUpload"
+import SectionHeader from "../sectionHeader"
+import FileUpload from "../fileUpload"
 import { useFormData } from "./FormDataManager"
 
 function OtherDocuments({ onNext }) {

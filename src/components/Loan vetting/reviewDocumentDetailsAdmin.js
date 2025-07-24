@@ -810,7 +810,7 @@ import { useState, useEffect } from "react"
 import { useParams, useHistory } from "react-router-dom"
 import { getDoc, setDoc } from "firebase/firestore"
 import { collection, getDocs } from "firebase/firestore"
-import { db } from "../firebase/config"
+import { db } from "../../firebase/config"
 import { doc, query, where, updateDoc } from "firebase/firestore"
 import {
   Container,
@@ -836,12 +836,12 @@ import {
   CardContent,
 } from "@mui/material"
 import { useFormData } from "./FormDataManager"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ImageIcon from "@mui/icons-material/Image"
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import SectionHeader from "./sectionHeader"
+import SectionHeader from "../sectionHeader"
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd"
 import CloseIcon from "@mui/icons-material/Close"
 import { arrayUnion } from "firebase/firestore"

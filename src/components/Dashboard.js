@@ -31,7 +31,7 @@ import {
 } from "@mui/material"
 import { UploadIcon, FileTextIcon, LogOutIcon, MenuIcon, UsersIcon, HomeIcon, CheckSquareIcon } from "lucide-react"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
-import ReviewDocumentsList from "./ReviewDocumentsList"
+import ReviewDocumentsList from "./Loan vetting/ReviewDocumentsList"
 
 const drawerWidth = 240
 

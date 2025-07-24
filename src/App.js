@@ -1,24 +1,25 @@
 
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom"
-import { FormDataProvider } from "./components/FormDataManager";
+import { FormDataProvider as LitigationFormDataProvider } from "./utils/litigationFormManager";
+import { FormDataProvider as LoanFormDataProvider } from "./components/Loan vetting/FormDataManager";
 import { useAuth } from "./contexts/AuthContext";
 import { AuthProvider } from "./contexts/AuthContext"
 import Login from "./components/Login"
 import Dashboard from "./components/Dashboard"
-import UploadDocuments from "./components/UploadDocuments"
-import ReviewDocuments from "./components/ReviewDocuments"
+import UploadDocuments from "./components/Loan vetting/UploadDocuments"
+import ReviewDocuments from "./components/Loan vetting/ReviewDocuments"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import MultiStepForm from "./components/MultiStepForm" 
-import ReviewDocumentsList from "./components/ReviewDocumentsList"
-import ReviewDocumentDetails from "./components/ReviewDocumentDetails"
-import SeeUploads from "./components/seeUploads"
-import SeeUploadDetails from "./components/seeUploadDetail"
-import AdminDocumentsList from "./components/adminList"
-import ReviewersList from "./components/reviewersList"
+import ReviewDocumentsList from "./components/Loan vetting/ReviewDocumentsList"
+import ReviewDocumentDetails from "./components/Loan vetting/ReviewDocumentDetails"
+import SeeUploads from "./components/Loan vetting/seeUploads"
+import SeeUploadDetails from "./components/Loan vetting/seeUploadDetail"
+import AdminDocumentsList from "./components/Loan vetting/adminList"
+import ReviewersList from "./components/Loan vetting/reviewersList"
 import AdminCreateUser from "./components/adminCreateUser"
 import ForceResetPassword from "./components/ForceResetPassword"
-import ReviewDocumentDetailsAdmin from "./components/reviewDocumentDetailsAdmin"
+import ReviewDocumentDetailsAdmin from "./components/Loan vetting/reviewDocumentDetailsAdmin"
 import NotationPage from "./components/Notation/notaionMain"
 import TrainingPage from "./components/Training/trainingMain"
 import LitigationPage from "./components/Litigation/litigationMain"
@@ -43,7 +44,7 @@ const theme = createTheme({
 function App() {
   const { currentUser } = useAuth();
   return (
-    <FormDataProvider>
+    <LoanFormDataProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -64,7 +65,6 @@ function App() {
               <Route path="/createUser" component={AdminCreateUser} />
               <Route path="/force-reset" component={ForceResetPassword} />
               <Route path="/adminDocs/:id" component={ReviewDocumentDetailsAdmin} />
-              <Route path="/litigation" component={LitigationPage} />
               <Route path="/guidance" component={GuidancePage} />
               <Route path="/health" component={HealthPage} />
               <Route path="/notation" component={NotationPage} />
@@ -73,6 +73,11 @@ function App() {
               <Route path="/willFullDefaulter" component={WillfulDefaulterForm} />
               <Route path="/willFullDefaulterDashboard" component={WillfulDefaulterDashboard} />
               <Route path="/willful-defaulter-details/:id" component={WillfulDefaulterDetails} />
+               <Route path="/litigation">
+                  <LitigationFormDataProvider>
+                    <LitigationPage />
+                  </LitigationFormDataProvider>
+                </Route>
               
               <Route path="*">
                 <Redirect to="/" />
@@ -84,7 +89,7 @@ function App() {
       </Router>
        </AuthProvider>
     </ThemeProvider>
-    </FormDataProvider>
+    </LoanFormDataProvider>
   )
 }
 

@@ -700,7 +700,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useHistory } from "react-router-dom"
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore"
-import { db } from "../firebase/config"
+import { db } from "../../firebase/config"
 import {
   Container,
   Typography,
@@ -723,14 +723,14 @@ import {
   useTheme,
 } from "@mui/material"
 import { useFormData } from "./FormDataManager"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ImageIcon from "@mui/icons-material/Image"
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import SaveIcon from "@mui/icons-material/Save"
 import SendIcon from "@mui/icons-material/Send"
-import SectionHeader from "./sectionHeader"
+import SectionHeader from "../sectionHeader"
 
 function ReviewDocumentDetails() {
   const { id } = useParams()

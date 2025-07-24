@@ -17,8 +17,8 @@ import {
   Divider,
   Alert,
 } from "@mui/material"
-import SectionHeader from "./sectionHeader"
-import FileUpload from "./fileUpload"
+import SectionHeader from "../sectionHeader"
+import FileUpload from "../fileUpload"
 import { useFormData } from "./FormDataManager"
 
 function Securities({ onNext }) {

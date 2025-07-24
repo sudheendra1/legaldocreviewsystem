@@ -950,7 +950,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useHistory } from "react-router-dom"
 import { doc, getDoc, collection, getDocs, query, where, updateDoc } from "firebase/firestore"
-import { db } from "../firebase/config"
+import { db } from "../../firebase/config"
 import {
   Container,
   Typography,
@@ -979,7 +979,7 @@ import {
   DialogActions,
   LinearProgress,
 } from "@mui/material"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ImageIcon from "@mui/icons-material/Image"
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"
@@ -990,8 +990,8 @@ import DescriptionIcon from "@mui/icons-material/Description"
 import SummarizeIcon from "@mui/icons-material/Summarize"
 import EditIcon from "@mui/icons-material/Edit"
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
-import SectionHeader from "./sectionHeader"
-import { uploadToS3, deleteMultipleFromS3 } from "../utils/s3Upload"
+import SectionHeader from "../sectionHeader"
+import { uploadToS3, deleteMultipleFromS3 } from "../../utils/s3Upload"
 
 // Document Title Component for Summary Report
 function DocumentTitle({ url, path, reviews, formatDate, onChangeDocument }) {

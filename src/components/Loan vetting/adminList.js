@@ -699,7 +699,7 @@
 
 import { useState, useEffect } from "react"
 import { collection, getDocs } from "firebase/firestore"
-import { db } from "../firebase/config"
+import { db } from "../../firebase/config"
 import { useHistory, Redirect } from "react-router-dom"
 import {
   Container,
@@ -731,7 +731,7 @@ import {
   Tab,
   Fade,
 } from "@mui/material"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
 import SearchIcon from "@mui/icons-material/Search"
 import DescriptionIcon from "@mui/icons-material/Description"
 import AccessTimeIcon from "@mui/icons-material/AccessTime"

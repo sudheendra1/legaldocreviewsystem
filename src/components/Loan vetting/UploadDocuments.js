@@ -15,7 +15,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material"
-import { AppThemeProvider } from "./uiTheme"
+import { AppThemeProvider } from "../uiTheme"
 import BorrowerDetails from "./BorrowerDetails"
 import LoanFacilities from "./LoanFacilities"
 import Securities from "./Securities"

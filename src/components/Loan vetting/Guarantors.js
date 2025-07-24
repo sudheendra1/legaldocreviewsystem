@@ -352,8 +352,8 @@ import {
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
 import PersonIcon from "@mui/icons-material/Person"
-import SectionHeader from "./sectionHeader"
-import FileUpload from "./fileUpload"
+import SectionHeader from "../sectionHeader"
+import FileUpload from "../fileUpload"
 import { useFormData } from "./FormDataManager"
 
 function Guarantors({ onNext }) {
