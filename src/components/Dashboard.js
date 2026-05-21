@@ -32,6 +32,7 @@ import {
 import { UploadIcon, FileTextIcon, LogOutIcon, MenuIcon, UsersIcon, HomeIcon, CheckSquareIcon } from "lucide-react"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
 import ReviewDocumentsList from "./Loan vetting/ReviewDocumentsList"
+import RecentActivities from "./RecentActivities"
 
 const drawerWidth = 240
 
@@ -424,6 +425,10 @@ function Dashboard() {
             </>
           )}
         </Grid>
+
+        {(role === "admin" || role === "review") && (
+          <RecentActivities userRole={role} userId={currentUser?.uid} />
+        )}
       </Box>
     </Box>
   )
