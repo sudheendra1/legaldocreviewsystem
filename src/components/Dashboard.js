@@ -519,25 +519,51 @@
 // }
 
 // export default Dashboard
-
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, Redirect,useHistory } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from "firebase/firestore"
-import { db } from "../firebase/config"
+import { signOut } from "firebase/auth"
+import { auth, db } from "../firebase/config"
 import {
-  Box, Typography, Button, Card, CardContent, CardActions,
-  Grid, Divider, Skeleton, Paper, List, ListItem, ListItemText
+  Box,
+  Typography,
+  Button,
+  AppBar,
+  Toolbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+  Chip,
+  Divider,
+  Skeleton,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Paper
 } from "@mui/material"
-import { UploadIcon, FileTextIcon, UsersIcon } from "lucide-react"
+import { UploadIcon, FileTextIcon, LogOutIcon, UsersIcon, HomeIcon, CheckSquareIcon } from "lucide-react"
+import PersonAddIcon from "@mui/icons-material/PersonAdd"
+import MenuIcon from "@mui/icons-material/Menu"
+import NotificationsIcon from "@mui/icons-material/Notifications"
 import WarningAmberIcon from "@mui/icons-material/WarningAmber"
 import FileUploadIcon from "@mui/icons-material/FileUpload"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import EventIcon from "@mui/icons-material/Event"
 
 import ReviewDocumentsList from "./Loan vetting/ReviewDocumentsList"
+
+
+const drawerWidth = 260;
 
 // Theme Colors
 const themeColors = {
@@ -552,12 +578,17 @@ function Dashboard() {
   const { currentUser, loading } = useAuth()
   const [role, setRole] = useState(null)
   const [roleLoading, setRoleLoading] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false)
   
   // Real-time activity states for multiple collections
   const [loanActivities, setLoanActivities] = useState([]);
   const [litigationActivities, setLitigationActivities] = useState([]);
   const [defaulterActivities, setDefaulterActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
+
+  const history = useHistory()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
 
   // 1. Fetch User Role
   useEffect(() => {
@@ -567,25 +598,31 @@ function Dashboard() {
         setRoleLoading(false)
         return
       }
-      try {
-        const docRef = doc(db, "users", currentUser.uid)
-        const docSnap = await getDoc(docRef)
-        if (docSnap.exists()) {
-          setRole(docSnap.data().role || null)
+      if (currentUser) {
+        try {
+          const docRef = doc(db, "users", currentUser.uid)
+          const docSnap = await getDoc(docRef)
+          if (docSnap.exists()) {
+            const userData = docSnap.data()
+            setRole(userData.role || null)
+          }
+        } catch (error) {
+          console.error("Error fetching role:", error)
+        } finally {
+          setRoleLoading(false)
         }
-      } catch (error) {
-        console.error("Error fetching role:", error)
-      } finally {
-        setRoleLoading(false)
       }
     }
-    if (!loading) fetchRole()
+    if (!loading) {
+      fetchRole()
+    }
   }, [currentUser, loading])
 
   // 2. Fetch Real-time Activities from Multiple Collections
   useEffect(() => {
     if (!currentUser || !role) return;
 
+    // Helper to build queries based on role
     const getQuery = (colName) => {
       const ref = collection(db, colName);
       if (role === "admin") {
@@ -595,7 +632,7 @@ function Dashboard() {
       }
     };
 
-    // Listener 1: Loans
+    // Listener 1: Loans / Uploads
     const unsubLoans = onSnapshot(getQuery("loan_documents"), (snapshot) => {
       const activities = snapshot.docs.map(doc => {
         const data = doc.data();
@@ -652,6 +689,19 @@ function Dashboard() {
     };
   }, [currentUser, role]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      history.push("/landing")
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
+  }
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
+
   // --- UI Helpers ---
   const getActivityIcon = (type) => {
     switch (type) {
@@ -677,6 +727,15 @@ function Dashboard() {
     if (interval > 1) return Math.floor(interval) + " mins ago";
     return Math.floor(seconds) + " seconds ago";
   };
+
+  const getRoleColor = () => {
+    switch (role) {
+      case "admin": return "error"
+      case "review": return "warning"
+      case "user": return "success"
+      default: return "default"
+    }
+  }
 
   const getRoleLabel = () => {
     switch (role) {
@@ -706,112 +765,183 @@ function Dashboard() {
   };
 
   if (loading || roleLoading) return <LoadingSkeleton />;
-  if (!loading && !currentUser) return null; // Redirection is handled by Layout/PrivateRoute
+  if (!loading && !currentUser) { history.push("/landing"); return null; }
 
   // Combine all fetched collections, sort by newest first, and take the top 10
   const activityFeed = [...loanActivities, ...litigationActivities, ...defaulterActivities]
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 10);
 
+  // const drawer = (
+  //   <Box sx={{ height: '100%', bgcolor: themeColors.navy, color: 'white', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+  //     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 3, pt: 4, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+  //       <Avatar sx={{ width: 64, height: 64, bgcolor: themeColors.royalBlue, mb: 1 }}>
+  //         {currentUser?.email?.charAt(0).toUpperCase() || "U"}
+  //       </Avatar>
+  //       <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif" }}>
+  //         {currentUser?.email?.split("@")[0]}
+  //       </Typography>
+  //       <Chip label={getRoleLabel()} color={getRoleColor()} size="small" sx={{ mt: 1, fontWeight: 'bold' }} />
+  //     </Box>
+      
+  //     <List sx={{ px: 2, flexGrow: 1, mt: 2 }}>
+  //       <ListItem button component={Link} to="/dashboard" sx={{ borderRadius: 2, mb: 1, bgcolor: 'rgba(255,255,255,0.1)' }}>
+  //         <ListItemIcon sx={{ color: 'white', minWidth: 40 }}><HomeIcon size={20} /></ListItemIcon>
+  //         <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 600, fontSize: '0.9rem' }} />
+  //       </ListItem>
+
+  //       {role === "user" && (
+  //         <>
+  //           <SidebarLink to="/upload" icon={<UploadIcon size={20} />} text="Vetting of loan documents" />
+  //           <SidebarLink to="/seeUploads" icon={<FileTextIcon size={20} />} text="My Uploads" />
+  //           <SidebarLink to="/litigation" icon={<FileTextIcon size={20} />} text="Litigation Monitoring" />
+  //           <SidebarLink to="/training" icon={<FileTextIcon size={20} />} text="Training" />
+  //           <SidebarLink to="/health" icon={<FileTextIcon size={20} />} text="Health consultation" />
+  //           <SidebarLink to="/guidance" icon={<FileTextIcon size={20} />} text="Guidance to startups" />
+  //           <SidebarLink to="/research" icon={<FileTextIcon size={20} />} text="Research" />
+  //           <SidebarLink to="/notation" icon={<FileTextIcon size={20} />} text="Nation's Enemy" />
+  //         </>
+  //       )}
+
+  //       {role === "review" && (
+  //         <>
+  //           <SidebarLink to="/review" icon={<CheckSquareIcon size={20} />} text="Review Documents" />
+  //           <SidebarLink to="/willFullDefaulter" icon={<FileTextIcon size={20} />} text="WillFull Defaulter" />
+  //         </>
+  //       )}
+
+  //       {role === "admin" && (
+  //         <>
+  //           <SidebarLink to="/adminDocs" icon={<FileTextIcon size={20} />} text="Vetting of loan documents" />
+  //           <SidebarLink to="/litigation" icon={<FileTextIcon size={20} />} text="Litigation Monitoring" />
+  //           <SidebarLink to="/training" icon={<FileTextIcon size={20} />} text="Training" />
+  //           <SidebarLink to="/willFullDefaulterDashboard" icon={<FileTextIcon size={20} />} text="WillFull Defaulter" />
+  //           <SidebarLink to="/health" icon={<FileTextIcon size={20} />} text="Health consultation" />
+  //           <SidebarLink to="/guidance" icon={<FileTextIcon size={20} />} text="Guidance to startups" />
+  //           <SidebarLink to="/research" icon={<FileTextIcon size={20} />} text="Research" />
+  //           <SidebarLink to="/notation" icon={<FileTextIcon size={20} />} text="Notation ecr" />
+  //           <SidebarLink to="/reviewers" icon={<UsersIcon size={20} />} text="Manage Employees" />
+  //           <SidebarLink to="/createUser" icon={<PersonAddIcon size={20} />} text="Create User" />
+  //         </>
+  //       )}
+  //     </List>
+      
+  //     <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+  //       <List disablePadding>
+  //         <ListItem button onClick={handleLogout} sx={{ borderRadius: 2, '&:hover': { bgcolor: 'rgba(239,68,68,0.1)' } }}>
+  //           <ListItemIcon sx={{ minWidth: 40 }}><LogOutIcon size={20} color="#ef4444" /></ListItemIcon>
+  //           <ListItemText primary="Logout" primaryTypographyProps={{ color: "#ef4444", fontWeight: 600 }} />
+  //         </ListItem>
+  //       </List>
+  //     </Box>
+  //   </Box>
+  // )
+
   return (
-    <Box sx={{ p: { xs: 3, md: 5 }, maxWidth: '1400px', mx: 'auto' }}>
+    <Box sx={{ display: "flex", minHeight: '100vh', bgcolor: themeColors.lightGray }}>
       
-      <Box sx={{ mb: 5 }}>
-        <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", color: themeColors.navy }}>
-          Dashboard
-        </Typography>
-        <Typography variant="body1" sx={{ color: themeColors.gray }}>
-          Welcome back, {currentUser?.email?.split("@")[0]}. Here's what you can do based on your {getRoleLabel()} role.
-        </Typography>
-      </Box>
 
-      {/* OVERVIEW METRICS */}
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Overview</Typography>
-      <Grid container spacing={3} sx={{ mb: 6 }}>
-        {getMetrics().map((metric, index) => (
-          <Grid item xs={12} md={4} key={index}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${themeColors.borderGray}`, transition: 'all 0.2s', '&:hover': { borderColor: themeColors.royalBlue, transform: 'translateY(-4px)' } }}>
-              <Typography variant="body2" sx={{ color: themeColors.gray, fontWeight: 500, mb: 1 }}>{metric.title}</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: themeColors.navy, mb: 1 }}>{metric.value}</Typography>
-              <Typography variant="caption" sx={{ color: metric.positive ? '#16a34a' : '#dc2626', fontWeight: 600 }}>{metric.trend}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 3, md: 5 }, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: "64px", maxWidth: '1400px', mx: 'auto' }}>
+        
+        <Box sx={{ mb: 5 }}>
+          <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", color: themeColors.navy }}>
+            Dashboard
+          </Typography>
+          <Typography variant="body1" sx={{ color: themeColors.gray }}>
+            Welcome back, {currentUser?.email?.split("@")[0]}. Here's what you can do based on your {getRoleLabel()} role.
+          </Typography>
+        </Box>
 
-      {/* QUICK ACTIONS */}
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Quick Actions</Typography>
-      
-      {role === "review" && (
-         <Box sx={{ mb: 6 }}>
-           <ReviewDocumentsList />
-         </Box>
-      )}
-
-      {role !== "review" && (
+        {/* OVERVIEW METRICS */}
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Overview</Typography>
         <Grid container spacing={3} sx={{ mb: 6 }}>
-          {role === "user" && (
-            <>
-              <Grid item xs={12} sm={6} md={6}>
-                <ActionCard title="Upload Documents" description="Submit new documents for review" icon={<UploadIcon size={32} />} to="/upload" buttonText="Upload Now" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <ActionCard title="View Your Uploads" description="Check the status of your submitted documents" icon={<FileTextIcon size={32} />} to="/seeUploads" buttonText="View Uploads" />
-              </Grid>
-            </>
-          )}
-
-          {role === "admin" && (
-            <>
-              <Grid item xs={12} sm={6} md={6}>
-                <ActionCard title="Manage Documents" description="View and manage all documents in the system" icon={<FileTextIcon size={32} />} to="/adminDocs" buttonText="View Documents" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <ActionCard title="Manage Employees" description="View and manage employee accounts and permissions" icon={<UsersIcon size={32} />} to="/reviewers" buttonText="Manage Employees" />
-              </Grid>
-            </>
-          )}
+          {getMetrics().map((metric, index) => (
+            <Grid item xs={12} md={4} key={index}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${themeColors.borderGray}`, transition: 'all 0.2s', '&:hover': { borderColor: themeColors.royalBlue, transform: 'translateY(-4px)' } }}>
+                <Typography variant="body2" sx={{ color: themeColors.gray, fontWeight: 500, mb: 1 }}>{metric.title}</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: themeColors.navy, mb: 1 }}>{metric.value}</Typography>
+                <Typography variant="caption" sx={{ color: metric.positive ? '#16a34a' : '#dc2626', fontWeight: 600 }}>{metric.trend}</Typography>
+              </Paper>
+            </Grid>
+          ))}
         </Grid>
-      )}
 
-      {/* DYNAMIC RECENT ACTIVITY FEED */}
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Recent Activity</Typography>
-      <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${themeColors.borderGray}`, overflow: 'hidden' }}>
-        {activitiesLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}><Typography sx={{color: themeColors.gray}}>Loading activity...</Typography></Box>
-        ) : activityFeed.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}><Typography sx={{color: themeColors.gray}}>No recent activity found.</Typography></Box>
-        ) : (
-          <List disablePadding>
-            {activityFeed.map((activity, index) => (
-              <React.Fragment key={activity.id}>
-                <ListItem sx={{ py: 2.5, px: 3 }}>
-                  <Box sx={{ 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 40, height: 40, borderRadius: '50%', mr: 2, 
-                      bgcolor: activity.type === 'alert' ? '#fee2e2' : activity.type === 'approval' ? '#dcfce7' : '#e0e7ff', 
-                      color: activity.type === 'alert' ? '#dc2626' : activity.type === 'approval' ? '#16a34a' : themeColors.royalBlue 
-                    }}>
-                    {getActivityIcon(activity.type)}
-                  </Box>
-                  <ListItemText 
-                    primary={
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: themeColors.navy }}>
-                        {role === 'admin' && activity.user ? <span style={{fontWeight: 'bold', color: themeColors.royalBlue}}>{activity.user} </span> : ''}
-                        {role === 'admin' && activity.user && activity.text ? activity.text.replace(activity.user + ' ', '') : activity.text}
-                      </Typography>
-                    }
-                    secondary={<Typography variant="caption" sx={{ color: themeColors.gray, mt: 0.5 }}>{activity.time}</Typography>}
-                  />
-                </ListItem>
-                {index < activityFeed.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
+        {/* QUICK ACTIONS */}
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Quick Actions</Typography>
+        
+        {role === "review" && (
+           <Box sx={{ mb: 6 }}>
+             <ReviewDocumentsList />
+           </Box>
         )}
-      </Paper>
+
+        {role !== "review" && (
+          <Grid container spacing={3} sx={{ mb: 6 }}>
+            {role === "user" && (
+              <>
+                <Grid item xs={12} sm={6} md={6}>
+                  <ActionCard title="Upload Documents" description="Submit new documents for review" icon={<UploadIcon size={32} />} to="/upload" buttonText="Upload Now" />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6}>
+                  <ActionCard title="View Your Uploads" description="Check the status of your submitted documents" icon={<FileTextIcon size={32} />} to="/seeUploads" buttonText="View Uploads" />
+                </Grid>
+              </>
+            )}
+
+            {role === "admin" && (
+              <>
+                <Grid item xs={12} sm={6} md={6}>
+                  <ActionCard title="Manage Documents" description="View and manage all documents in the system" icon={<FileTextIcon size={32} />} to="/adminDocs" buttonText="View Documents" />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6}>
+                  <ActionCard title="Manage Employees" description="View and manage employee accounts and permissions" icon={<UsersIcon size={32} />} to="/reviewers" buttonText="Manage Employees" />
+                </Grid>
+              </>
+            )}
+          </Grid>
+        )}
+
+        {/* DYNAMIC RECENT ACTIVITY FEED */}
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: themeColors.navy }}>Recent Activity</Typography>
+        <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${themeColors.borderGray}`, overflow: 'hidden' }}>
+          {activitiesLoading ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}><Typography sx={{color: themeColors.gray}}>Loading activity...</Typography></Box>
+          ) : activityFeed.length === 0 ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}><Typography sx={{color: themeColors.gray}}>No recent activity found.</Typography></Box>
+          ) : (
+            <List disablePadding>
+              {activityFeed.map((activity, index) => (
+                <React.Fragment key={activity.id}>
+                  <ListItem sx={{ py: 2.5, px: 3 }}>
+                    <Box sx={{ 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 40, height: 40, borderRadius: '50%', mr: 2, 
+                        bgcolor: activity.type === 'alert' ? '#fee2e2' : activity.type === 'approval' ? '#dcfce7' : '#e0e7ff', 
+                        color: activity.type === 'alert' ? '#dc2626' : activity.type === 'approval' ? '#16a34a' : themeColors.royalBlue 
+                      }}>
+                      {getActivityIcon(activity.type)}
+                    </Box>
+                    <ListItemText 
+                      primary={
+                        <Typography variant="body1" sx={{ fontWeight: 500, color: themeColors.navy }}>
+                          {role === 'admin' && activity.user ? <span style={{fontWeight: 'bold', color: themeColors.royalBlue}}>{activity.user} </span> : ''}
+                          {role === 'admin' && activity.user && activity.text ? activity.text.replace(activity.user + ' ', '') : activity.text}
+                        </Typography>
+                      }
+                      secondary={<Typography variant="caption" sx={{ color: themeColors.gray, mt: 0.5 }}>{activity.time}</Typography>}
+                    />
+                  </ListItem>
+                  {index < activityFeed.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </Paper>
+      </Box>
     </Box>
   )
 }
+
+
 
 function ActionCard({ title, description, icon, to, buttonText }) {
   return (
@@ -838,17 +968,27 @@ function ActionCard({ title, description, icon, to, buttonText }) {
 
 function LoadingSkeleton() {
   return (
-    <Box sx={{ p: { xs: 3, md: 5 }, maxWidth: '1400px', mx: 'auto' }}>
-      <Skeleton variant="text" height={60} width="40%" />
-      <Skeleton variant="text" height={30} width="60%" sx={{ mb: 4 }} />
-      <Grid container spacing={3} sx={{ mb: 6 }}>
-        {[1, 2, 3].map((item) => (
-          <Grid item xs={12} md={4} key={item}>
-            <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3 }} />
-          </Grid>
-        ))}
-      </Grid>
-      <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3 }} />
+    <Box sx={{ display: "flex", minHeight: '100vh', bgcolor: themeColors.lightGray }}>
+      <Box sx={{ width: drawerWidth, flexShrink: 0, display: { xs: "none", sm: "block" }, bgcolor: themeColors.navy }}>
+        <Box sx={{ p: 3, pt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Skeleton variant="circular" width={64} height={64} sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
+          <Skeleton variant="text" height={30} width="60%" sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.1)' }} />
+        </Box>
+        <Box sx={{ p: 2 }}>
+          {[1, 2, 3, 4].map((item) => <Skeleton key={item} height={40} sx={{ my: 1, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 2 }} />)}
+        </Box>
+      </Box>
+      <Box component="main" sx={{ flexGrow: 1, p: 4, mt: "64px" }}>
+        <Skeleton variant="text" height={60} width="40%" />
+        <Skeleton variant="text" height={30} width="60%" sx={{ mb: 4 }} />
+        <Grid container spacing={3}>
+          {[1, 2, 3].map((item) => (
+            <Grid item xs={12} md={4} key={item}>
+              <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3 }} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   )
 }

@@ -30,7 +30,6 @@ import WillfulDefaulterForm from "./components/Wilfull defaulter/wilfulDefaulter
 import WillfulDefaulterDashboard from "./components/Wilfull defaulter/willfulDefaulterDashboard"
 import WillfulDefaulterDetails from "./components/Wilfull defaulter/willfullDefaulterDetails";
 import LandingPage from "./components/LandingPage";
-import Landing from "./components/Landing Page/Landing";
 import Layout from "./components/Layout"
 
 const theme = createTheme({
@@ -47,7 +46,7 @@ const theme = createTheme({
 function App() {
   const { currentUser } = useAuth();
   return (
-    <LoanFormDataProvider>
+
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -56,7 +55,6 @@ function App() {
           <Switch>
               <Route exact path="/login" component={Login} />
               <Route path="/landing" component={LandingPage} />
-              <Route path="/landingPage" component={Landing} />
                <Route path="/force-reset" component={ForceResetPassword} />
                <Route>
                 <Layout>
@@ -91,10 +89,11 @@ function App() {
                 <Route path="*">
                 <Redirect to="/" />
             </Route>
+               
                   </Switch>
                 </Layout>
                </Route>
-              
+               
               
               
             {/* <Route path="/upload">{user ? <UploadDocuments /> : <Redirect to="/login" />}</Route>
@@ -104,7 +103,7 @@ function App() {
       </Router>
        </AuthProvider>
     </ThemeProvider>
-    </LoanFormDataProvider>
+    
   )
 }
 

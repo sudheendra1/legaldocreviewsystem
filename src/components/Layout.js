@@ -61,7 +61,7 @@ export default function Layout({ children }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      history.push("/login");
+      history.push("/landing");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -88,7 +88,7 @@ export default function Layout({ children }) {
   };
 
   if (loading || roleLoading) return <LoadingSkeleton />;
-  if (!currentUser) { history.push("/login"); return null; }
+  if (!currentUser) { history.push("/landing"); return null; }
 
   // Sidebar Link Helper - Automatically highlights active route
   const SidebarLink = ({ to, icon, text }) => {
