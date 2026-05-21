@@ -6,6 +6,7 @@ import { useAuth } from "./contexts/AuthContext";
 import { AuthProvider } from "./contexts/AuthContext"
 import Login from "./components/Login"
 import Dashboard from "./components/Dashboard"
+import LandingPage from "./components/LandingPage/LandingPage"
 import UploadDocuments from "./components/Loan vetting/UploadDocuments"
 import ReviewDocuments from "./components/Loan vetting/ReviewDocuments"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
@@ -51,6 +52,7 @@ function App() {
       <Router>
         <div className="app">
           <Switch>
+              <Route exact path="/landing" component={LandingPage} />
               <Route exact path="/login" component={Login} />
               <Route exact path="/" component={Dashboard} />
               <Route path="/upload" component={UploadDocuments} />
