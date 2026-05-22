@@ -38,23 +38,23 @@ const LandingPage = () => {
   const services = [
     {
       icon: <AccountBalanceIcon fontSize="large" />,
-      title: 'Financial Planning',
-      description: 'Comprehensive financial planning for individuals and families.'
+      title: 'Document Vetting',
+      description: 'Accurate verification and review of banking and legal documents to ensure compliance and reduce processing risks.'
     },
     {
       icon: <AccountBalanceWalletIcon fontSize="large" />,
-      title: 'Estate Planning',
-      description: 'Expert estate planning services to secure your legacy.'
+      title: 'Litigation Monitoring',
+      description: 'End-to-end tracking and management of legal cases, notices, and litigation updates for financial institutions.'
     },
     {
       icon: <BusinessCenterIcon fontSize="large" />,
-      title: 'Business Law',
-      description: 'Legal support for businesses of all sizes.'
+      title: 'Wilful Defaulter Management',
+      description: 'Assistance in identifying, monitoring, and processing wilful defaulter cases in accordance with banking and regulatory guidelines.'
     },
     {
       icon: <MonetizationOnIcon fontSize="large" />,
-      title: 'Tax Advisory',
-      description: 'Strategic tax advisory services to optimize your financial position.'
+      title: 'Notation & ECR Services',
+      description: 'Streamlined handling of notation processes and ECR-related operations with a focus on accuracy, compliance, and timely execution.'
     }
   ];
 
@@ -103,10 +103,10 @@ const LandingPage = () => {
         <Container maxWidth={false} sx={{ position: 'relative', zIndex: 1, px: { xs: 2, md: 8, xl: 12 } }}>
           <Box sx={{ width: '100%', textAlign: 'left' }}>
             <Typography variant="h1" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", mb: 3, fontSize: { xs: '3rem', md: '4.5rem', lg: '6rem' } }}>
-              Empowering Your Financial <br/>and Legal Future
+              Empowering Banks Through <br/>Smarter Operations
             </Typography>
             <Typography variant="h4" sx={{ color: '#e5e7eb', mb: 6, fontWeight: 400, maxWidth: '60%', lineHeight: 1.6 }}>
-              We provide comprehensive financial and legal services tailored to your unique needs. Our team of experts is dedicated to helping you achieve your goals with confidence and clarity.
+              We partner with financial institutions to manage complex operational and legal workflows allowing banks to focus on growth, customer relationships, and core banking functions.
             </Typography>
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Button href="#services" variant="contained" sx={{ bgcolor: themeColors.royalBlue, px: 6, py: 2.5, fontWeight: 'bold', textTransform: 'none', fontSize: '1.25rem', borderRadius: 2 }}>
@@ -125,10 +125,10 @@ const LandingPage = () => {
         <Container maxWidth={false} sx={{ px: { xs: 2, md: 8, xl: 12 } }}>
           <Box sx={{ width: '100%' }}>
             <Typography variant="h2" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", mb: 4 }}>
-              About Apex Financial & Legal
+              About JuraTech Solutions
             </Typography>
             <Typography variant="h5" sx={{ color: themeColors.gray, fontWeight: 400, lineHeight: 1.8 }}>
-              Apex Financial & Legal is a leading provider of integrated financial and legal services. With a commitment to excellence and client satisfaction, we offer a wide range of solutions to individuals, families, and businesses. Our experienced professionals combine their expertise to deliver strategic guidance and support, ensuring your financial and legal well-being.
+              JuraTech Solutions is a specialized banking support company focused on operational excellence and process efficiency for financial institutions. We assist banks with document verification, litigation monitoring, compliance processes, data management, and other critical backend operations.<br/>Our goal is simple, to help banks reduce operational load, improve accuracy, and focus on delivering better financial services to their customers.
             </Typography>
           </Box>
         </Container>
@@ -142,7 +142,7 @@ const LandingPage = () => {
               Our Services
             </Typography>
             <Typography variant="h5" sx={{ color: themeColors.gray, fontWeight: 400 }}>
-              Tailored solutions to meet your specific financial and legal needs.
+              Specialized operational and compliance solutions designed for modern banking institutions.
             </Typography>
           </Box>
           <Grid container spacing={6}>
@@ -169,19 +169,19 @@ const LandingPage = () => {
         <Container maxWidth={false} sx={{ px: { xs: 2, md: 8, xl: 12 } }}>
           <Box sx={{ mb: 10 }}>
             <Typography variant="h2" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", mb: 2 }}>
-              Research Highlights
+              Industry Insights
             </Typography>
             <Typography variant="h5" sx={{ color: themeColors.gray, fontWeight: 400 }}>
-              In-depth analysis to guide your decisions.
+              Research and operational insights for the evolving banking sector.
             </Typography>
           </Box>
           <Paper elevation={4} sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', borderRadius: 4 }}>
             <Box sx={{ p: { xs: 4, md: 8, lg: 12 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <Typography variant="h2" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", mb: 4 }}>
-                Market Trends and Investment Strategies
+                Improving Banking Efficiency Through Operational Support
               </Typography>
               <Typography sx={{ color: themeColors.gray, fontSize: '1.5rem', mb: 6, lineHeight: 1.7 }}>
-                Stay informed with our latest research on market trends and investment strategies. Our analysis provides valuable insights to help you make informed decisions.
+                Discover how streamlined document processing, litigation monitoring, and compliance support can help banks reduce delays, improve accuracy, and optimize operational performance.
               </Typography>
               <Box>
                 <Link href="#" underline="hover" sx={{ color: themeColors.royalBlue, fontWeight: 'bold', fontSize: '1.25rem', display: 'inline-flex', alignItems: 'center' }}>
@@ -230,10 +230,11 @@ const LandingPage = () => {
           <Grid container spacing={8} sx={{ mb: 10 }}>
             <Grid item xs={12} md={6}>
               <Typography variant="h3" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif", mb: 3 }}>
-                Apex Financial & Legal
+                JuraTech Solutions
               </Typography>
               <Typography sx={{ color: '#9ca3af', fontSize: '1.25rem', maxWidth: '600px' }}>
-                Your trusted partner in financial and legal excellence.
+                {/* Your trusted partner in banking and legal excellence. */}
+                Bank better—with us behind the scenes.
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -263,7 +264,7 @@ const LandingPage = () => {
           </Grid>
           <Box sx={{ borderTop: '1px solid #374151', pt: 6, textAlign: 'center' }}>
             <Typography sx={{ color: '#9ca3af', fontSize: '1.1rem' }}>
-              © {new Date().getFullYear()} Apex Financial & Legal. All rights reserved.
+              © {new Date().getFullYear()} JuraTech Solutions. All rights reserved.
             </Typography>
           </Box>
         </Container>
