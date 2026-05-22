@@ -29,6 +29,8 @@ import ResearchPage from "./components/Research/researchMain"
 import WillfulDefaulterForm from "./components/Wilfull defaulter/wilfulDefaulterMain"
 import WillfulDefaulterDashboard from "./components/Wilfull defaulter/willfulDefaulterDashboard"
 import WillfulDefaulterDetails from "./components/Wilfull defaulter/willfullDefaulterDetails";
+import LandingPage from "./components/LandingPage";
+import Layout from "./components/Layout"
 
 const theme = createTheme({
   palette: {
@@ -44,7 +46,7 @@ const theme = createTheme({
 function App() {
   const { currentUser } = useAuth();
   return (
-    <LoanFormDataProvider>
+<LoanFormDataProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -52,6 +54,11 @@ function App() {
         <div className="app">
           <Switch>
               <Route exact path="/login" component={Login} />
+              <Route path="/landing" component={LandingPage} />
+               <Route path="/force-reset" component={ForceResetPassword} />
+               <Route>
+                <Layout>
+                  <Switch>
               <Route exact path="/" component={Dashboard} />
               <Route path="/upload" component={UploadDocuments} />
               {/* <Route path="/review" component={ReviewDocuments} /> */}
@@ -63,7 +70,7 @@ function App() {
               <Route path="/adminDocs" exact component={AdminDocumentsList} />
               <Route path="/reviewers" component={ReviewersList} />
               <Route path="/createUser" component={AdminCreateUser} />
-              <Route path="/force-reset" component={ForceResetPassword} />
+             
               <Route path="/adminDocs/:id" component={ReviewDocumentDetailsAdmin} />
               <Route path="/guidance" component={GuidancePage} />
               <Route path="/health" component={HealthPage} />
@@ -73,15 +80,22 @@ function App() {
               <Route path="/willFullDefaulter" component={WillfulDefaulterForm} />
               <Route path="/willFullDefaulterDashboard" component={WillfulDefaulterDashboard} />
               <Route path="/willful-defaulter-details/:id" component={WillfulDefaulterDetails} />
+              
                <Route path="/litigation">
                   <LitigationFormDataProvider>
                     <LitigationPage />
                   </LitigationFormDataProvider>
                 </Route>
-              
-              <Route path="*">
+                <Route path="*">
                 <Redirect to="/" />
             </Route>
+               
+                  </Switch>
+                </Layout>
+               </Route>
+               
+              
+              
             {/* <Route path="/upload">{user ? <UploadDocuments /> : <Redirect to="/login" />}</Route>
             <Route path="/review">{user ? <ReviewDocuments /> : <Redirect to="/login" />}</Route> */}
           </Switch>
@@ -90,6 +104,7 @@ function App() {
        </AuthProvider>
     </ThemeProvider>
     </LoanFormDataProvider>
+    
   )
 }
 

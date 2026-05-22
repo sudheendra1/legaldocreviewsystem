@@ -104,7 +104,7 @@ function Login() {
           }}
         >
           <Typography component="h1" variant="h4" fontWeight="bold" gutterBottom>
-            Legal Document Review System
+            Login to Juratech Solutions
           </Typography>
 
           {/* <Tabs
