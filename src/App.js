@@ -46,7 +46,7 @@ const theme = createTheme({
 function App() {
   const { currentUser } = useAuth();
   return (
-
+<LoanFormDataProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -103,6 +103,7 @@ function App() {
       </Router>
        </AuthProvider>
     </ThemeProvider>
+    </LoanFormDataProvider>
     
   )
 }
