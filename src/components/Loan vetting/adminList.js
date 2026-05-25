@@ -157,7 +157,7 @@ const fetchSubmissions = async () => {
       const response = await api.get(`/vetting/submissions/queue`);
       const data = response.data;
       
-      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      data.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
 
       setSubmissions(data)
       setFilteredSubmissions(data)
@@ -180,85 +180,132 @@ const fetchSubmissions = async () => {
   //   }
   // }
 
+  // const fetchReviewers = async () => {
+  //   try {
+  //     const q = query(collection(db, "users"), where("role", "==", "review"))
+  //     const snapshot = await getDocs(q)
+  //     const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
+  //     setReviewers(data)
+  //   } catch (error) {
+  //     console.error("Error fetching reviewers:", error)
+  //   }
+  // }
+
   const fetchReviewers = async () => {
     try {
-      const q = query(collection(db, "users"), where("role", "==", "review"))
-      const snapshot = await getDocs(q)
-      const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
-      setReviewers(data)
+      const response = await api.get("/auth/users?role=REVIEWER");
+      // Map 'id' to 'uid' so we don't have to change your dropdown UI code
+      const data = response.data.map(user => ({ ...user, uid: user.id }));
+      setReviewers(data);
     } catch (error) {
-      console.error("Error fetching reviewers:", error)
+      console.error("Error fetching reviewers:", error);
     }
   }
 
-  const handleAssignReviewer = async () => {
+  // const handleAssignReviewer = async () => {
+  //   try {
+  //     const submissionDoc = doc(db, "submissions", assigningSubmissionId)
+  //     const newReviewerDoc = doc(db, "users", selectedReviewer)
+
+  //     if (currentSubmission.reviewer && currentSubmission.reviewer !== selectedReviewer) {
+  //       const oldReviewerDoc = doc(db, "users", currentSubmission.reviewer)
+  //       await updateDoc(oldReviewerDoc, {
+  //         assignedCount: increment(-1),
+  //         filesAssigned: arrayRemove(assigningSubmissionId),
+  //         inProgress: increment(-1),
+  //       })
+  //     }
+
+  //     await updateDoc(submissionDoc, {
+  //       reviewer: selectedReviewer,
+  //       status: "pending-under-review",
+  //     })
+
+  //     await updateDoc(newReviewerDoc, {
+  //       assignedCount: increment(1),
+  //       filesAssigned: arrayUnion(assigningSubmissionId),
+  //       inProgress: increment(1),
+  //     })
+
+  //     fetchSubmissions()
+  //     setOpenReviewerDialog(false)
+  //     setSelectedReviewer("")
+  //   } catch (error) {
+  //     console.error("Error assigning reviewer:", error)
+  //     alert("Failed to assign reviewer.")
+  //   }
+  // }
+
+const handleAssignReviewer = async () => {
     try {
-      const submissionDoc = doc(db, "submissions", assigningSubmissionId)
-      const newReviewerDoc = doc(db, "users", selectedReviewer)
-
-      if (currentSubmission.reviewer && currentSubmission.reviewer !== selectedReviewer) {
-        const oldReviewerDoc = doc(db, "users", currentSubmission.reviewer)
-        await updateDoc(oldReviewerDoc, {
-          assignedCount: increment(-1),
-          filesAssigned: arrayRemove(assigningSubmissionId),
-          inProgress: increment(-1),
-        })
-      }
-
-      await updateDoc(submissionDoc, {
+      // Call our new PUT endpoint
+      await api.put(`/vetting/submissions/${assigningSubmissionId}/status`, {
         reviewer: selectedReviewer,
-        status: "pending-under-review",
-      })
+        status: "pending-under-review"
+      });
 
-      await updateDoc(newReviewerDoc, {
-        assignedCount: increment(1),
-        filesAssigned: arrayUnion(assigningSubmissionId),
-        inProgress: increment(1),
-      })
-
-      fetchSubmissions()
-      setOpenReviewerDialog(false)
-      setSelectedReviewer("")
+      fetchSubmissions();
+      setOpenReviewerDialog(false);
+      setSelectedReviewer("");
     } catch (error) {
-      console.error("Error assigning reviewer:", error)
-      alert("Failed to assign reviewer.")
+      console.error("Error assigning reviewer:", error);
+      alert("Failed to assign reviewer.");
     }
   }
 
-  const handleAssignStatus = async () => {
+  // const handleAssignStatus = async () => {
+  //   if (!assigningStatus) {
+  //     alert("Please select a status.")
+  //     return
+  //   }
+  //   try {
+  //     await updateDoc(doc(db, "submissions", assigningSubmissionId), {
+  //       status: assigningStatus,
+  //     })
+
+  //     if (currentSubmission.reviewer) {
+  //       const reviewerDoc = doc(db, "users", currentSubmission.reviewer)
+
+  //       if (["approved", "rejected"].includes(assigningStatus)) {
+  //         await updateDoc(reviewerDoc, {
+  //           assignedCount: increment(-1),
+  //           filesAssigned: arrayRemove(assigningSubmissionId),
+  //           inProgress: increment(-1),
+  //           [assigningStatus]: increment(1),
+  //         })
+  //       } else if (assigningStatus === "completed") {
+  //         await updateDoc(reviewerDoc, {
+  //           inProgress: increment(-1),
+  //           completed: increment(1),
+  //         })
+  //       }
+  //     }
+
+  //     fetchSubmissions()
+  //     setOpenStatusDialog(false)
+  //     setAssigningStatus("pending")
+  //   } catch (error) {
+  //     console.error("Error changing status:", error)
+  //     alert(`Error changing status: ${error}`)
+  //   }
+  // }
+
+const handleAssignStatus = async () => {
     if (!assigningStatus) {
       alert("Please select a status.")
       return
     }
     try {
-      await updateDoc(doc(db, "submissions", assigningSubmissionId), {
-        status: assigningStatus,
-      })
+      await api.put(`/vetting/submissions/${assigningSubmissionId}/status`, {
+        status: assigningStatus
+      });
 
-      if (currentSubmission.reviewer) {
-        const reviewerDoc = doc(db, "users", currentSubmission.reviewer)
-
-        if (["approved", "rejected"].includes(assigningStatus)) {
-          await updateDoc(reviewerDoc, {
-            assignedCount: increment(-1),
-            filesAssigned: arrayRemove(assigningSubmissionId),
-            inProgress: increment(-1),
-            [assigningStatus]: increment(1),
-          })
-        } else if (assigningStatus === "completed") {
-          await updateDoc(reviewerDoc, {
-            inProgress: increment(-1),
-            completed: increment(1),
-          })
-        }
-      }
-
-      fetchSubmissions()
-      setOpenStatusDialog(false)
-      setAssigningStatus("pending")
+      fetchSubmissions();
+      setOpenStatusDialog(false);
+      setAssigningStatus("pending");
     } catch (error) {
-      console.error("Error changing status:", error)
-      alert(`Error changing status: ${error}`)
+      console.error("Error changing status:", error);
+      alert(`Error changing status: ${error.response?.data || error.message}`);
     }
   }
 
@@ -314,16 +361,34 @@ const fetchSubmissions = async () => {
     }
   }
 
+  // const formatDate = (timestamp) => {
+  //   if (!timestamp || !timestamp.seconds) return "N/A"
+  //   const date = new Date(timestamp.seconds * 1000)
+  //   return date.toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //   })
+  // }
+
+
   const formatDate = (timestamp) => {
-    if (!timestamp || !timestamp.seconds) return "N/A"
-    const date = new Date(timestamp.seconds * 1000)
+    if (!timestamp) return "N/A";
+    
+    // If it's the old Firebase format { seconds: ... }
+    if (typeof timestamp === 'object' && timestamp.seconds) {
+      return new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
+        year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+      });
+    }
+    
+    // If it's the new Spring Boot ISO String (e.g., "2026-05-25T...")
+    const date = new Date(timestamp);
     return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+      year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+    });
   }
 
   const getReviewerName = (reviewerId) => {
@@ -529,7 +594,7 @@ const fetchSubmissions = async () => {
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                         <Box>
                           <Typography variant="h6" component="h2" gutterBottom>
-                            {submission?.submissionName || "Unnamed Borrower"}
+                            {submission?.name || "Unnamed Borrower"}
                           </Typography>
                           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                             <BusinessIcon fontSize="small" sx={{ color: "text.secondary", mr: 1 }} />

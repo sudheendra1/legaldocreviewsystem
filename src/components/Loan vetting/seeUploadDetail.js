@@ -240,97 +240,133 @@ function SeeUploadDetails() {
     "Other Documents",
   ]
 
+  // useEffect(() => {
+  //   // const fetchSubmission = async () => {
+  //   //   try {
+  //   //     console.log("Viewing document with ID:", id)
+  //   //     const docRef = doc(db, "submissions", id)
+  //   //     const docSnap = await getDoc(docRef)
+
+  //   //     if (docSnap.exists()) {
+  //   //       console.log("Document data:", docSnap.data())
+  //   //       setSubmission(docSnap.data())
+  //   //       if (docSnap.data().reviewer) {
+  //   //         const docRefRev = doc(db, "users", docSnap.data().reviewer)
+  //   //         const docSnapRev = await getDoc(docRefRev)
+  //   //         setReviewer(docSnapRev.data())
+  //   //         console.log("Reviewer data:", docSnapRev.data())
+  //   //       }
+  //   //     } else {
+  //   //       console.error("No such document!")
+  //   //       setError("Document not found. It may have been deleted or you don't have permission to view it.")
+  //   //     }
+  //   //   } catch (error) {
+  //   //     console.error("Error fetching submission: ", error)
+  //   //     setError(`Error loading document: ${error.message}`)
+  //   //   } finally {
+  //   //     setLoading(false)
+  //   //   }
+  //   // }
+
+  // const fetchSubmissionAndReview = async () => {
+  //     try {
+  //       setLoading(true);
+  //       // Fetch the specific document from Spring Boot
+  //       const response = await api.get(`/vetting/submissions/${id}`);
+  //       setSubmission(response.data);
+        
+  //       // Fetch the review details for this document
+  //       try {
+  //           const reviewResponse = await api.get(`/reviews/submission/${id}`);
+  //           if (reviewResponse.data) {
+  //               setExistingComments(reviewResponse.data.documentComments || {});
+  //           }
+  //       } catch (reviewErr) {
+  //           console.log("No existing review found yet.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching submission: ", error)
+  //       setError(`Error loading document.`)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+
+    
+
+  //   const fetchReviewComments = async () => {
+  //     try {
+  //       const reviewRef = doc(db, "reviews", id)
+  //       const reviewSnap = await getDoc(reviewRef)
+
+  //       if (reviewSnap.exists()) {
+  //         const reviewData = reviewSnap.data()
+  //         setExistingComments(reviewData.documentComments || reviewData.comments || {})
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching review comments:", error)
+  //     }
+  //   }
+
+  //   // const fetchReviews = async () => {
+  //   //   if (!id) return
+
+  //   //   setLoadingReviews(true)
+  //   //   try {
+  //   //     const reviewsQuery = query(collection(db, "reviews"), where("submissionId", "==", id))
+  //   //     const reviewsSnapshot = await getDocs(reviewsQuery)
+  //   //     const reviewsData = reviewsSnapshot.docs.map((doc) => ({
+  //   //       id: doc.id,
+  //   //       ...doc.data(),
+  //   //     }))
+  //   //     setReviews(reviewsData)
+  //   //   } catch (error) {
+  //   //     console.error("Error fetching reviews:", error)
+  //   //   } finally {
+  //   //     setLoadingReviews(false)
+  //   //   }
+  //   // }
+
+  //   fetchSubmissionAndReview()
+  //   fetchReviewComments()
+  //   // fetchReviews()
+  // }, [id])
+
   useEffect(() => {
-    // const fetchSubmission = async () => {
-    //   try {
-    //     console.log("Viewing document with ID:", id)
-    //     const docRef = doc(db, "submissions", id)
-    //     const docSnap = await getDoc(docRef)
-
-    //     if (docSnap.exists()) {
-    //       console.log("Document data:", docSnap.data())
-    //       setSubmission(docSnap.data())
-    //       if (docSnap.data().reviewer) {
-    //         const docRefRev = doc(db, "users", docSnap.data().reviewer)
-    //         const docSnapRev = await getDoc(docRefRev)
-    //         setReviewer(docSnapRev.data())
-    //         console.log("Reviewer data:", docSnapRev.data())
-    //       }
-    //     } else {
-    //       console.error("No such document!")
-    //       setError("Document not found. It may have been deleted or you don't have permission to view it.")
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching submission: ", error)
-    //     setError(`Error loading document: ${error.message}`)
-    //   } finally {
-    //     setLoading(false)
-    //   }
-    // }
-
-  const fetchSubmissionAndReview = async () => {
+    const fetchSubmissionAndReview = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        // Fetch the specific document from Spring Boot
+        // Fetch specific document
         const response = await api.get(`/vetting/submissions/${id}`);
         setSubmission(response.data);
         
-        // Fetch the review details for this document
+        // Fetch reviewer details if assigned
+        if (response.data.reviewer) {
+           // We don't strictly need to fetch the whole reviewer object just for the name if 
+           // we just display the ID, or you can add an endpoint to fetch a single user by ID.
+        }
+        
+        // Fetch review details
         try {
             const reviewResponse = await api.get(`/reviews/submission/${id}`);
             if (reviewResponse.data) {
                 setExistingComments(reviewResponse.data.documentComments || {});
+                setReviews([reviewResponse.data]); // Set reviews for the DocumentTitle component
             }
         } catch (reviewErr) {
             console.log("No existing review found yet.");
+            setReviews([]);
         }
       } catch (error) {
-        console.error("Error fetching submission: ", error)
-        setError(`Error loading document.`)
+        console.error("Error fetching submission: ", error);
+        setError("Error loading document.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    
-
-    const fetchReviewComments = async () => {
-      try {
-        const reviewRef = doc(db, "reviews", id)
-        const reviewSnap = await getDoc(reviewRef)
-
-        if (reviewSnap.exists()) {
-          const reviewData = reviewSnap.data()
-          setExistingComments(reviewData.documentComments || reviewData.comments || {})
-        }
-      } catch (error) {
-        console.error("Error fetching review comments:", error)
-      }
-    }
-
-    // const fetchReviews = async () => {
-    //   if (!id) return
-
-    //   setLoadingReviews(true)
-    //   try {
-    //     const reviewsQuery = query(collection(db, "reviews"), where("submissionId", "==", id))
-    //     const reviewsSnapshot = await getDocs(reviewsQuery)
-    //     const reviewsData = reviewsSnapshot.docs.map((doc) => ({
-    //       id: doc.id,
-    //       ...doc.data(),
-    //     }))
-    //     setReviews(reviewsData)
-    //   } catch (error) {
-    //     console.error("Error fetching reviews:", error)
-    //   } finally {
-    //     setLoadingReviews(false)
-    //   }
-    // }
-
-    fetchSubmissionAndReview()
-    fetchReviewComments()
-    // fetchReviews()
-  }, [id])
+    fetchSubmissionAndReview();
+  }, [id]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
@@ -466,13 +502,18 @@ function SeeUploadDetails() {
       })
 
       // Update the document in Firebase first
-      const docRef = doc(db, "submissions", id)
-      await updateDoc(docRef, {
+      // const docRef = doc(db, "submissions", id)
+      // await updateDoc(docRef, {
+      //   ...updatedSubmission,
+      //   lastModified: new Date(),
+      //   modifiedBy: currentUser.uid,
+      //   status: "pending-under-review", // Change status to indicate it needs review again
+      // })
+
+      await api.put(`/vetting/submissions/${id}`, {
         ...updatedSubmission,
-        lastModified: new Date(),
-        modifiedBy: currentUser.uid,
-        status: "pending-under-review", // Change status to indicate it needs review again
-      })
+        modifiedBy: currentUser.uid
+      });
 
       // Delete old files from S3 after successful Firebase update
       if (filesToDelete.length > 0) {

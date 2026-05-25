@@ -67,9 +67,10 @@ export function AuthProvider({ children }) {
     const storedEmail = localStorage.getItem("userEmail");
     const storedRole = localStorage.getItem("userRole");
     const storedName = localStorage.getItem("userName");
+    const storedUid = localStorage.getItem("userUid");
 
     if (token && storedEmail) {
-      setCurrentUser({ email: storedEmail, name: storedName }); // You can expand this object as needed
+      setCurrentUser({ email: storedEmail, name: storedName,uid: storedUid }); // You can expand this object as needed
       setRole(storedRole);
     }
     setLoading(false);
@@ -81,7 +82,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem("userEmail", userData.email);
     localStorage.setItem("userRole", userData.role);
     localStorage.setItem("userName", userData.name);
-    setCurrentUser({ email: userData.email,name: userData.name });
+    localStorage.setItem("userUid", userData.uid);
+
+    setCurrentUser({ email: userData.email,name: userData.name,uid: userData.uid });
     setRole(userData.role);
   }
 

@@ -269,68 +269,146 @@ const fetchSubmissions = async () => {
     }
   }
 
-  const fetchReviewers = async () => {
+  // const fetchReviewers = async () => {
+  //   try {
+  //     const q = query(collection(db, "users"), where("role", "==", "review"))
+  //     const snapshot = await getDocs(q)
+  //     const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
+  //     setReviewers(data)
+  //   } catch (error) {
+  //     console.error("Error fetching reviewers:", error)
+  //   }
+  // }
+const fetchReviewers = async () => {
     try {
-      const q = query(collection(db, "users"), where("role", "==", "review"))
-      const snapshot = await getDocs(q)
-      const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
-      setReviewers(data)
+      const response = await api.get("/auth/users?role=REVIEWER");
+      const data = response.data.map(user => ({ ...user, uid: user.id }));
+      setReviewers(data);
     } catch (error) {
-      console.error("Error fetching reviewers:", error)
+      console.error("Error fetching reviewers:", error);
     }
   }
 
+  const handleAssignReviewer = async () => {
+    setSubmitting(true);
+    try {
+      await api.put(`/vetting/submissions/${currentSubmission.id}/status`, {
+        reviewer: selectedReviewer,
+        status: "pending-under-review"
+      });
+
+      fetchSubmissions();
+      setOpenReviewerDialog(false);
+    } catch (error) {
+      console.error("Error assigning reviewer:", error);
+      setError("Failed to assign reviewer. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // 3. Update Status using Spring Boot
+  const handleAssignStatus = async () => {
+    setSubmitting(true);
+    try {
+      await api.put(`/vetting/submissions/${currentSubmission.id}/status`, {
+        status: assigningStatus
+      });
+
+      fetchSubmissions();
+      setOpenStatusDialog(false);
+    } catch (error) {
+      console.error("Error assigning status:", error);
+      setError("Failed to assign status. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // useEffect(() => {
+  //   const fetchReviews = async () => {
+  //     if (!id) return
+
+  //     setLoadingReviews(true)
+  //     try {
+  //       const reviewsQuery = query(collection(db, "reviews"), where("submissionId", "==", id))
+  //       const reviewsSnapshot = await getDocs(reviewsQuery)
+  //       const reviewsData = reviewsSnapshot.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       }))
+  //       setReviews(reviewsData)
+  //     } catch (error) {
+  //       console.error("Error fetching reviews:", error)
+  //     } finally {
+  //       setLoadingReviews(false)
+  //     }
+  //   }
+
+  //   const fetchSubmission = async () => {
+  //     try {
+  //       console.log("Reviewing document with ID:", id)
+  //       const docRef = doc(db, "submissions", id)
+  //       const docSnap = await getDoc(docRef)
+
+  //       if (docSnap.exists()) {
+  //         const submissionData = {
+  //           id: docSnap.id,
+  //           ...docSnap.data(),
+  //         }
+  //         console.log("Document data:", submissionData)
+  //         setSubmission(submissionData)
+  //         setCurrentSubmission(submissionData) // Also set currentSubmission
+  //       } else {
+  //         console.error("No such document!")
+  //         setError("Document not found. It may have been deleted or you don't have permission to view it.")
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching submission: ", error)
+  //       setError(`Error loading document: ${error.message}`)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+
+  //   fetchSubmission()
+  //   fetchSubmissions()
+  //   fetchReviewers()
+  //   fetchReviews()
+  // }, [id])
+
   useEffect(() => {
-    const fetchReviews = async () => {
-      if (!id) return
-
-      setLoadingReviews(true)
+    const fetchSubmissionData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const reviewsQuery = query(collection(db, "reviews"), where("submissionId", "==", id))
-        const reviewsSnapshot = await getDocs(reviewsQuery)
-        const reviewsData = reviewsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        setReviews(reviewsData)
-      } catch (error) {
-        console.error("Error fetching reviews:", error)
-      } finally {
-        setLoadingReviews(false)
-      }
-    }
+        // 1. Fetch the document details
+        const response = await api.get(`/vetting/submissions/${id}`);
+        setSubmission(response.data);
+        setCurrentSubmission(response.data);
 
-    const fetchSubmission = async () => {
-      try {
-        console.log("Reviewing document with ID:", id)
-        const docRef = doc(db, "submissions", id)
-        const docSnap = await getDoc(docRef)
-
-        if (docSnap.exists()) {
-          const submissionData = {
-            id: docSnap.id,
-            ...docSnap.data(),
+        // 2. Fetch the reviews for this document
+        try {
+          const reviewRes = await api.get(`/reviews/submission/${id}`);
+          if (reviewRes.data) {
+            setReviews([reviewRes.data]); // Put in array for UI mapping
           }
-          console.log("Document data:", submissionData)
-          setSubmission(submissionData)
-          setCurrentSubmission(submissionData) // Also set currentSubmission
-        } else {
-          console.error("No such document!")
-          setError("Document not found. It may have been deleted or you don't have permission to view it.")
+        } catch (err) {
+          console.log("No reviews found for this document.");
+          setReviews([]);
         }
-      } catch (error) {
-        console.error("Error fetching submission: ", error)
-        setError(`Error loading document: ${error.message}`)
-      } finally {
-        setLoading(false)
-      }
-    }
 
-    fetchSubmission()
-    fetchSubmissions()
-    fetchReviewers()
-    fetchReviews()
-  }, [id])
+      } catch (error) {
+        console.error("Error fetching submission: ", error);
+        setError("Error loading document.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubmissionData();
+    fetchReviewers(); // Keeps your assign dropdown working
+  }, [id]);
 
   const handleDocumentCommentChange = (documentUrl, newComment) => {
     setFormData((prev) => ({
@@ -342,17 +420,49 @@ const fetchSubmissions = async () => {
     }))
   }
 
+  // const handleSubmitReview = async () => {
+  //   try {
+  //     setSubmitting(true)
+  //     await setDoc(doc(db, "reviews", id), {
+  //       submissionId: id,
+  //       reviewerUid: currentUser.uid,
+  //       reviewerName: currentUser.displayName || currentUser.email.split("@")[0],
+  //       documentComments: formData.documentComments || {},
+  //       submittedAt: new Date(),
+  //     })
+  //     history.push("/dashboard")
+  //   } catch (err) {
+  //     console.error("Error submitting review:", err)
+  //     setError("Failed to submit review. Please try again.")
+  //   } finally {
+  //     setSubmitting(false)
+  //   }
+  // }
+
   const handleSubmitReview = async () => {
     try {
       setSubmitting(true)
-      await setDoc(doc(db, "reviews", id), {
+
+      // 1. Prepare the payload for your Spring Boot ReviewController
+      const reviewData = {
         submissionId: id,
         reviewerUid: currentUser.uid,
         reviewerName: currentUser.displayName || currentUser.email.split("@")[0],
         documentComments: formData.documentComments || {},
-        submittedAt: new Date(),
-      })
-      history.push("/dashboard")
+      }
+
+      // 2. Post the review to Spring Boot
+      await api.post(`/reviews`, reviewData);
+
+      // 3. Update the submission status to "under-review" 
+      // (Using the PUT endpoint we added to DocumentController)
+      await api.put(`/vetting/submissions/${id}/status`, {
+        status: "under-review",
+        reviewer: currentUser.uid
+      });
+
+      // 4. Navigate back to the admin dashboard
+      history.push("/adminDocs") // Ensure this path matches your admin dashboard route
     } catch (err) {
       console.error("Error submitting review:", err)
       setError("Failed to submit review. Please try again.")
@@ -526,53 +636,53 @@ const fetchSubmissions = async () => {
     setOpenStatusDialog(true)
   }
 
-  const handleAssignReviewer = async () => {
-    setSubmitting(true)
-    try {
-      // Update the submission document with the selected reviewer
-      await updateDoc(doc(db, "submissions", currentSubmission.id), {
-        reviewer: selectedReviewer,
-        status: "pending-under-review",
-      })
+  // const handleAssignReviewer = async () => {
+  //   setSubmitting(true)
+  //   try {
+  //     // Update the submission document with the selected reviewer
+  //     await updateDoc(doc(db, "submissions", currentSubmission.id), {
+  //       reviewer: selectedReviewer,
+  //       status: "pending-under-review",
+  //     })
 
-      // Optionally, update the reviewer's document to include the submission ID
-      await updateDoc(doc(db, "users", selectedReviewer), {
-        assignedSubmissions: arrayUnion(currentSubmission.id),
-      })
+  //     // Optionally, update the reviewer's document to include the submission ID
+  //     await updateDoc(doc(db, "users", selectedReviewer), {
+  //       assignedSubmissions: arrayUnion(currentSubmission.id),
+  //     })
 
-      // Refresh submissions
-      fetchSubmissions()
+  //     // Refresh submissions
+  //     fetchSubmissions()
 
-      // Close the dialog
-      setOpenReviewerDialog(false)
-    } catch (error) {
-      console.error("Error assigning reviewer:", error)
-      setError("Failed to assign reviewer. Please try again.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  //     // Close the dialog
+  //     setOpenReviewerDialog(false)
+  //   } catch (error) {
+  //     console.error("Error assigning reviewer:", error)
+  //     setError("Failed to assign reviewer. Please try again.")
+  //   } finally {
+  //     setSubmitting(false)
+  //   }
+  // }
 
-  const handleAssignStatus = async () => {
-    setSubmitting(true)
-    try {
-      // Update the submission document with the selected status
-      await updateDoc(doc(db, "submissions", currentSubmission.id), {
-        status: assigningStatus,
-      })
+  // const handleAssignStatus = async () => {
+  //   setSubmitting(true)
+  //   try {
+  //     // Update the submission document with the selected status
+  //     await updateDoc(doc(db, "submissions", currentSubmission.id), {
+  //       status: assigningStatus,
+  //     })
 
-      // Refresh submissions
-      fetchSubmissions()
+  //     // Refresh submissions
+  //     fetchSubmissions()
 
-      // Close the dialog
-      setOpenStatusDialog(false)
-    } catch (error) {
-      console.error("Error assigning status:", error)
-      setError("Failed to assign status. Please try again.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  //     // Close the dialog
+  //     setOpenStatusDialog(false)
+  //   } catch (error) {
+  //     console.error("Error assigning status:", error)
+  //     setError("Failed to assign status. Please try again.")
+  //   } finally {
+  //     setSubmitting(false)
+  //   }
+  // }
 
   if (loading) {
     return (
