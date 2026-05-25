@@ -28,6 +28,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility"
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff"
 import LoginIcon from "@mui/icons-material/Login"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
+import api from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -36,56 +38,80 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const history = useHistory()
+  const { login } = useAuth();
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
+  //   setError("")
+  //   setLoading(true)
+
+  //   try {
+  //     let user = null
+  //       const userCredential = await signInWithEmailAndPassword(auth, email, password)
+       
+  //       user = userCredential.user
+
+  //       const userDoc = await getDoc(doc(db, "users", user.uid))
+
+  //       if (!userDoc.exists()) {
+  //         setError("User info not found. Please contact support.")
+  //         setLoading(false)
+  //         return
+  //       }
+  //       const userData = userDoc.data();
+  //       if (userData.mustResetPassword) {
+          
+  //         history.push("/force-reset");
+  //         return;
+  //       }
+
+  //       console.log("✅ Login successful. User:", user.uid)
+      
+
+  //     history.push("/dashboard")
+  //   } catch (err) {
+  //     console.error("❌ Error during authentication:", err)
+
+  
+  //     if (err.code === "auth/wrong-password") {
+  //       setError("Incorrect password. Please try again.")
+  //     } else if (err.code === "auth/user-not-found") {
+  //       setError("No account found with this email. Please sign up.")
+  //     } else if (err.code === "auth/email-already-in-use") {
+  //       setError("This email is already registered. Please log in instead.")
+  //     } else if (err.code === "auth/weak-password") {
+  //       setError("Password is too weak. Please use at least 6 characters.")
+  //     } else {
+  //       setError(err.message || "Authentication failed.")
+  //     }
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
     try {
-      let user = null
-        const userCredential = await signInWithEmailAndPassword(auth, email, password)
-       
-        user = userCredential.user
+      // 1. Call Spring Boot
+      const response = await api.post("/auth/login", { 
+          email: email, 
+          password: password 
+      });
 
-        const userDoc = await getDoc(doc(db, "users", user.uid))
-
-        if (!userDoc.exists()) {
-          setError("User info not found. Please contact support.")
-          setLoading(false)
-          return
-        }
-        const userData = userDoc.data();
-        if (userData.mustResetPassword) {
-          
-          history.push("/force-reset");
-          return;
-        }
-
-        console.log("✅ Login successful. User:", user.uid)
-      
+      // 2. Save the data globally using AuthContext
+      login(response.data);
 
       history.push("/dashboard")
     } catch (err) {
       console.error("❌ Error during authentication:", err)
-
-  
-      if (err.code === "auth/wrong-password") {
-        setError("Incorrect password. Please try again.")
-      } else if (err.code === "auth/user-not-found") {
-        setError("No account found with this email. Please sign up.")
-      } else if (err.code === "auth/email-already-in-use") {
-        setError("This email is already registered. Please log in instead.")
-      } else if (err.code === "auth/weak-password") {
-        setError("Password is too weak. Please use at least 6 characters.")
-      } else {
-        setError(err.message || "Authentication failed.")
-      }
+      setError(err.response?.data?.message || "Invalid email or password.")
     } finally {
       setLoading(false)
     }
   }
-
 
   return (
     <Container component="main" maxWidth="sm">

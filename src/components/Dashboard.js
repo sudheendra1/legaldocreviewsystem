@@ -561,6 +561,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import EventIcon from "@mui/icons-material/Event"
 
 import ReviewDocumentsList from "./Loan vetting/ReviewDocumentsList"
+import api from '../services/api';
 
 
 const drawerWidth = 260;
@@ -575,9 +576,9 @@ const themeColors = {
 };
 
 function Dashboard() {
-  const { currentUser, loading } = useAuth()
-  const [role, setRole] = useState(null)
-  const [roleLoading, setRoleLoading] = useState(true)
+  const { currentUser,role: contextRole, loading } = useAuth()
+  // const [role, setRole] = useState(null)
+  // const [roleLoading, setRoleLoading] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
   
   // Real-time activity states for multiple collections
@@ -589,104 +590,148 @@ function Dashboard() {
   const history = useHistory()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const [activityFeed, setActivityFeed] = useState([])
+  const role = contextRole ? contextRole.toLowerCase().replace("reviewer", "review") : null;
 
   // 1. Fetch User Role
-  useEffect(() => {
-    const fetchRole = async () => {
-      if (!currentUser) {
-        setRole(null)
-        setRoleLoading(false)
-        return
-      }
-      if (currentUser) {
-        try {
-          const docRef = doc(db, "users", currentUser.uid)
-          const docSnap = await getDoc(docRef)
-          if (docSnap.exists()) {
-            const userData = docSnap.data()
-            setRole(userData.role || null)
-          }
-        } catch (error) {
-          console.error("Error fetching role:", error)
-        } finally {
-          setRoleLoading(false)
-        }
-      }
-    }
-    if (!loading) {
-      fetchRole()
-    }
-  }, [currentUser, loading])
+  // useEffect(() => {
+  //   const fetchRole = async () => {
+  //     if (!currentUser) {
+  //       setRole(null)
+  //       setRoleLoading(false)
+  //       return
+  //     }
+  //     if (currentUser) {
+  //       try {
+  //         const docRef = doc(db, "users", currentUser.uid)
+  //         const docSnap = await getDoc(docRef)
+  //         if (docSnap.exists()) {
+  //           const userData = docSnap.data()
+  //           setRole(userData.role || null)
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching role:", error)
+  //       } finally {
+  //         setRoleLoading(false)
+  //       }
+  //     }
+  //   }
+  //   if (!loading) {
+  //     fetchRole()
+  //   }
+  // }, [currentUser, loading])
 
   // 2. Fetch Real-time Activities from Multiple Collections
+  // useEffect(() => {
+  //   if (!currentUser || !role) return;
+
+  //   // Helper to build queries based on role
+  //   const getQuery = (colName) => {
+  //     const ref = collection(db, colName);
+  //     if (role === "admin") {
+  //       return query(ref, orderBy("createdAt", "desc"), limit(10));
+  //     } else {
+  //       return query(ref, where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(10));
+  //     }
+  //   };
+
+  //   // Listener 1: Loans / Uploads
+  //   const unsubLoans = onSnapshot(getQuery("loan_documents"), (snapshot) => {
+  //     const activities = snapshot.docs.map(doc => {
+  //       const data = doc.data();
+  //       return {
+  //         id: doc.id,
+  //         type: 'upload', 
+  //         user: data.userName || data.email || 'A user', 
+  //         text: `Uploaded a loan document ${data.documentName ? `(${data.documentName})` : ''}`, 
+  //         timestamp: data.createdAt?.toMillis() || 0,
+  //         time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
+  //       };
+  //     });
+  //     setLoanActivities(activities);
+  //   }, (error) => console.error("Error fetching loans:", error));
+
+  //   // Listener 2: Litigations
+  //   const unsubLitigations = onSnapshot(getQuery("litigations"), (snapshot) => {
+  //     const activities = snapshot.docs.map(doc => {
+  //       const data = doc.data();
+  //       return {
+  //         id: doc.id,
+  //         type: 'approval', 
+  //         user: data.userName || data.email || 'A user',
+  //         text: `Updated litigation case ${data.caseNumber || ''}`, 
+  //         timestamp: data.createdAt?.toMillis() || 0,
+  //         time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
+  //       };
+  //     });
+  //     setLitigationActivities(activities);
+  //   }, (error) => console.error("Error fetching litigations:", error));
+
+  //   // Listener 3: Wilful Defaulters
+  //   const unsubDefaulters = onSnapshot(getQuery("wilful_defaulters"), (snapshot) => {
+  //     const activities = snapshot.docs.map(doc => {
+  //       const data = doc.data();
+  //       return {
+  //         id: doc.id,
+  //         type: 'alert', 
+  //         user: data.userName || data.email || 'A user',
+  //         text: `Added willful defaulter record for ${data.companyName || 'an entity'}`, 
+  //         timestamp: data.createdAt?.toMillis() || 0,
+  //         time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
+  //       };
+  //     });
+  //     setDefaulterActivities(activities);
+  //   }, (error) => console.error("Error fetching defaulters:", error));
+
+  //   setActivitiesLoading(false);
+
+  //   return () => {
+  //     unsubLoans();
+  //     unsubLitigations();
+  //     unsubDefaulters();
+  //   };
+  // }, [currentUser, role]);
+
   useEffect(() => {
     if (!currentUser || !role) return;
 
-    // Helper to build queries based on role
-    const getQuery = (colName) => {
-      const ref = collection(db, colName);
-      if (role === "admin") {
-        return query(ref, orderBy("createdAt", "desc"), limit(10));
-      } else {
-        return query(ref, where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(10));
+    const fetchActivities = async () => {
+      try {
+        setActivitiesLoading(true);
+        
+        // Determine endpoint based on role
+        const endpoint = role === "admin" 
+          ? '/activities/global' 
+          : `/activities/user/${currentUser.uid}`;
+
+        const response = await api.get(endpoint);
+        
+        // Format the timestamps for the UI
+        const formattedActivities = response.data.map(log => ({
+            id: log.id,
+            type: log.type || "System",
+            user: log.userName || 'A user',
+            text: log.description,
+            time: formatTimeAgo(new Date(log.createdAt))
+        }));
+
+        // Replace the old activityFeed logic with this direct state
+        // (You'll need to add const [activityFeed, setActivityFeed] = useState([]) at the top of your component)
+        setActivityFeed(formattedActivities);
+        
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+      } finally {
+        setActivitiesLoading(false);
       }
     };
 
-    // Listener 1: Loans / Uploads
-    const unsubLoans = onSnapshot(getQuery("loan_documents"), (snapshot) => {
-      const activities = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          type: 'upload', 
-          user: data.userName || data.email || 'A user', 
-          text: `Uploaded a loan document ${data.documentName ? `(${data.documentName})` : ''}`, 
-          timestamp: data.createdAt?.toMillis() || 0,
-          time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
-        };
-      });
-      setLoanActivities(activities);
-    }, (error) => console.error("Error fetching loans:", error));
+    fetchActivities();
+    
+    // Optional: Auto-refresh the feed every 30 seconds
+    const interval = setInterval(fetchActivities, 30000);
+    return () => clearInterval(interval);
 
-    // Listener 2: Litigations
-    const unsubLitigations = onSnapshot(getQuery("litigations"), (snapshot) => {
-      const activities = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          type: 'approval', 
-          user: data.userName || data.email || 'A user',
-          text: `Updated litigation case ${data.caseNumber || ''}`, 
-          timestamp: data.createdAt?.toMillis() || 0,
-          time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
-        };
-      });
-      setLitigationActivities(activities);
-    }, (error) => console.error("Error fetching litigations:", error));
-
-    // Listener 3: Wilful Defaulters
-    const unsubDefaulters = onSnapshot(getQuery("wilful_defaulters"), (snapshot) => {
-      const activities = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          type: 'alert', 
-          user: data.userName || data.email || 'A user',
-          text: `Added willful defaulter record for ${data.companyName || 'an entity'}`, 
-          timestamp: data.createdAt?.toMillis() || 0,
-          time: data.createdAt ? formatTimeAgo(data.createdAt.toDate()) : 'Just now'
-        };
-      });
-      setDefaulterActivities(activities);
-    }, (error) => console.error("Error fetching defaulters:", error));
-
-    setActivitiesLoading(false);
-
-    return () => {
-      unsubLoans();
-      unsubLitigations();
-      unsubDefaulters();
-    };
   }, [currentUser, role]);
 
   const handleLogout = async () => {
@@ -764,13 +809,14 @@ function Dashboard() {
     ];
   };
 
-  if (loading || roleLoading) return <LoadingSkeleton />;
+  // if (loading || roleLoading) return <LoadingSkeleton />;
+   if (loading) return <LoadingSkeleton />;
   if (!loading && !currentUser) { history.push("/landing"); return null; }
 
   // Combine all fetched collections, sort by newest first, and take the top 10
-  const activityFeed = [...loanActivities, ...litigationActivities, ...defaulterActivities]
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .slice(0, 10);
+  //  activityFeed = [...loanActivities, ...litigationActivities, ...defaulterActivities]
+  //   .sort((a, b) => b.timestamp - a.timestamp)
+  //   .slice(0, 10);
 
   // const drawer = (
   //   <Box sx={{ height: '100%', bgcolor: themeColors.navy, color: 'white', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
