@@ -25,6 +25,7 @@ import RegistrationOfSecurity from "./RegistrationOfSecurity"
 import Guarantors from "./Guarantors"
 import ConfirmUpload from "./ConfirmUpload"
 
+
 function UploadDocuments() {
   const [activeStep, setActiveStep] = useState(0)
   const [completed, setCompleted] = useState({})

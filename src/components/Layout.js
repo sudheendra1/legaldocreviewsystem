@@ -26,37 +26,38 @@ const themeColors = {
 };
 
 export default function Layout({ children }) {
-  const { currentUser, loading } = useAuth();
-  const [role, setRole] = useState(null);
-  const [roleLoading, setRoleLoading] = useState(true);
+  const { currentUser, role: contextRole, loading } = useAuth();
+  // const [role, setRole] = useState(null);
+  // const [roleLoading, setRoleLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   
   const history = useHistory();
   const location = useLocation(); // To track current URL
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const role = contextRole ? contextRole.toLowerCase().replace("reviewer", "review") : null;
 
-  useEffect(() => {
-    const fetchRole = async () => {
-      if (!currentUser) {
-        setRole(null);
-        setRoleLoading(false);
-        return;
-      }
-      try {
-        const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setRole(docSnap.data().role || null);
-        }
-      } catch (error) {
-        console.error("Error fetching role:", error);
-      } finally {
-        setRoleLoading(false);
-      }
-    };
-    if (!loading) fetchRole();
-  }, [currentUser, loading]);
+  // useEffect(() => {
+  //   const fetchRole = async () => {
+  //     if (!currentUser) {
+  //       setRole(null);
+  //       setRoleLoading(false);
+  //       return;
+  //     }
+  //     try {
+  //       const docRef = doc(db, "users", currentUser.uid);
+  //       const docSnap = await getDoc(docRef);
+  //       if (docSnap.exists()) {
+  //         setRole(docSnap.data().role || null);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching role:", error);
+  //     } finally {
+  //       setRoleLoading(false);
+  //     }
+  //   };
+  //   if (!loading) fetchRole();
+  // }, [currentUser, loading]);
 
   const handleLogout = async () => {
     try {
@@ -87,7 +88,8 @@ export default function Layout({ children }) {
     }
   };
 
-  if (loading || roleLoading) return <LoadingSkeleton />;
+  // if (loading || roleLoading) return <LoadingSkeleton />;
+   if (loading) return <LoadingSkeleton />;
   if (!currentUser) { history.push("/landing"); return null; }
 
   // Sidebar Link Helper - Automatically highlights active route
@@ -113,7 +115,7 @@ export default function Layout({ children }) {
           {currentUser?.email?.charAt(0).toUpperCase() || "U"}
         </Avatar>
         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontFamily: "'Playfair Display', serif" }}>
-          {currentUser?.email?.split("@")[0]}
+          {currentUser?.name || currentUser?.email?.split("@")[0]}
         </Typography>
         <Chip label={getRoleLabel()} color={getRoleColor()} size="small" sx={{ mt: 1, fontWeight: 'bold' }} />
       </Box>

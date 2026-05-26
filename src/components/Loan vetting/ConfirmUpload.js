@@ -30,6 +30,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import HomeIcon from "@mui/icons-material/Home"
+import api from '../../services/api';
 
 function ConfirmUpload() {
   const { formData, setFormData } = useFormData()
@@ -135,22 +136,40 @@ function ConfirmUpload() {
       }
 
       
-      const docRef = await addDoc(collection(db, "submissions"), {
+      // const docRef = await addDoc(collection(db, "submissions"), {
+      //   ...tempData,
+      //   submittedBy: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "Unknown User"),
+      //   submittedByUid: currentUser.uid,
+      //   submittedAt: new Date(),
+      //   status: "pending",
+      //   userId: currentUser.uid,
+      //   name: submissionName,
+      // })
+      const payload = {
         ...tempData,
         submittedBy: currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "Unknown User"),
         submittedByUid: currentUser.uid,
-        submittedAt: new Date(),
+        // Spring Boot handles the submittedAt timestamp automatically
         status: "pending",
         userId: currentUser.uid,
         name: submissionName,
-      })
+      };
 
-      setSubmissionId(docRef.id)
-      setSuccessMessage(`Your documents have been successfully uploaded and submitted for review.`)
-      setFormData({}) 
-      setActiveStep(2)
+      const response = await api.post("/vetting/submissions", payload);
+
+      // Spring Boot returns the saved document, including its new MongoDB ID
+      setSubmissionId(response.data.id);
+      
+      setSuccessMessage(`Your documents have been successfully uploaded and submitted for review.`);
+      setFormData({}); 
+      setActiveStep(2);
+
+      // setSubmissionId(docRef.id)
+      // setSuccessMessage(`Your documents have been successfully uploaded and submitted for review.`)
+      // setFormData({}) 
+      // setActiveStep(2)
     } catch (err) {
-      console.error(err)
+      console.error("Backend submission error:", err)
       setError("Something went wrong during upload. Please try again.")
       setActiveStep(0)
     } finally {
