@@ -385,6 +385,7 @@
 import { collection, addDoc, getDocs, query, where, orderBy, doc, getDoc } from "firebase/firestore"
 import { db } from "../firebase/config"
 import { uploadToS3 } from "./s3Upload"
+import api from "../services/api";
 
 export const uploadDocumentsToS3 = async (files, onProgress) => {
   if (!files || files.length === 0) return []
@@ -567,20 +568,28 @@ export const saveWillfulDefaulterData = async (formData) => {
     uploadedData.status = "pending" // Using your existing status convention
     uploadedData.module = "willful-defaulter"
 
-    console.log("All documents uploaded successfully. Saving to Firestore...")
+    console.log("All documents uploaded successfully. Saving to MongoDb...")
     console.log("Final uploadedData structure:", JSON.stringify(uploadedData, null, 2))
 
     // Save to Firebase Firestore using the same "submissions" collection as your loan documents
     // but with module identifier to distinguish willful defaulter submissions
-    const docRef = await addDoc(collection(db, "willfulDefaulterSubmissions"), uploadedData)
+    // const docRef = await addDoc(collection(db, "willfulDefaulterSubmissions"), uploadedData)
+    const response = await api.post('/willful-defaulter', uploadedData);
+    console.log("Data successfully saved to MongoDB with ID:", response.data.id);
 
-    console.log("Data saved to Firestore with ID:", docRef.id)
+  return {
+    success: true,
+    id: response.data.id,
+    message: "Willful defaulter data saved successfully",
+  };
 
-    return {
-      success: true,
-      id: docRef.id,
-      message: "Willful defaulter data saved successfully",
-    }
+    // console.log("Data saved to Firestore with ID:", docRef.id)
+
+    // return {
+    //   success: true,
+    //   id: docRef.id,
+    //   message: "Willful defaulter data saved successfully",
+    // }
   } catch (error) {
     console.error("Error saving willful defaulter data:", error)
     throw error
@@ -610,17 +619,21 @@ export const getWillfulDefaulterData = async (filters = {}) => {
 
     q = query(q, orderBy("submittedAt", "desc"))
 
-    const querySnapshot = await getDocs(q)
-    const data = []
+    // const querySnapshot = await getDocs(q)
+    // const data = []
 
-    querySnapshot.forEach((doc) => {
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    // querySnapshot.forEach((doc) => {
+    //   data.push({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   })
+    // })
+    const response = await api.get('/willful-defaulter/search', {
+      params: filters
+    });
+    return response.data;
 
-    return data
+    // return data
   } catch (error) {
     console.error("Error fetching willful defaulter data:", error)
     throw error
@@ -628,49 +641,52 @@ export const getWillfulDefaulterData = async (filters = {}) => {
 }
 
 // Function to save draft data (no S3 uploads) - separate collection for drafts
-export const saveWillfulDefaulterDraft = async (formData) => {
-  try {
-    const draftData = {
-      ...formData,
-      status: "draft",
-      submittedAt: new Date(),
-      updatedAt: new Date(),
-      module: "willful-defaulter",
-    }
+// export const saveWillfulDefaulterDraft = async (formData) => {
+//   try {
+//     const draftData = {
+//       ...formData,
+//       status: "draft",
+//       submittedAt: new Date(),
+//       updatedAt: new Date(),
+//       module: "willful-defaulter",
+//     }
 
-    const docRef = await addDoc(collection(db, "willfulDefaulterDrafts"), draftData)
+//     const docRef = await addDoc(collection(db, "willfulDefaulterDrafts"), draftData)
 
-    return {
-      success: true,
-      id: docRef.id,
-      message: "Draft saved successfully",
-    }
-  } catch (error) {
-    console.error("Error saving draft:", error)
-    throw error
-  }
-}
+//     return {
+//       success: true,
+//       id: docRef.id,
+//       message: "Draft saved successfully",
+//     }
+//   } catch (error) {
+//     console.error("Error saving draft:", error)
+//     throw error
+//   }
+// }
 
 // Function to get all willful defaulter submissions for admin/dashboard view
 export const getAllWillfulDefaulterSubmissions = async () => {
   try {
     console.log("🔍 Fetching all willful defaulter submissions...")
-    const q = query(collection(db, "willfulDefaulterSubmissions"), orderBy("submittedAt", "desc"))
-    const querySnapshot = await getDocs(q)
+    // const q = query(collection(db, "willfulDefaulterSubmissions"), orderBy("submittedAt", "desc"))
+    // const querySnapshot = await getDocs(q)
     const data = []
 
-    console.log("📊 Query snapshot size:", querySnapshot.size)
+    // console.log("📊 Query snapshot size:", querySnapshot.size)
 
-    querySnapshot.forEach((doc) => {
-      console.log("📄 Document found:", doc.id, doc.data())
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    // querySnapshot.forEach((doc) => {
+    //   console.log("📄 Document found:", doc.id, doc.data())
+    //   data.push({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   })
+    // })
+    const response = await api.get('/willful-defaulter');
+    console.log("✅ Data successfully fetched from MongoDB. Total submissions:", response.data.length);
+     return response.data;
 
-    console.log("✅ Total submissions found:", data.length)
-    return data
+    // console.log("✅ Total submissions found:", data.length)
+    // return data
   } catch (error) {
     console.error("❌ Error fetching all willful defaulter submissions:", error)
     throw error
@@ -681,26 +697,27 @@ export const getAllWillfulDefaulterSubmissions = async () => {
 export const getWillfulDefaulterSubmissionsByUser = async (userId) => {
   try {
     console.log("🔍 Fetching submissions for user:", userId)
-    const q = query(
-      collection(db, "willfulDefaulterSubmissions"),
-      where("submittedByUid", "==", userId),
-      orderBy("submittedAt", "desc"),
-    )
-    const querySnapshot = await getDocs(q)
+    // const q = query(
+    //   collection(db, "willfulDefaulterSubmissions"),
+    //   where("submittedByUid", "==", userId),
+    //   orderBy("submittedAt", "desc"),
+    // )
+    // const querySnapshot = await getDocs(q)
     const data = []
 
-    console.log("📊 User query snapshot size:", querySnapshot.size)
+    // console.log("📊 User query snapshot size:", querySnapshot.size)
 
-    querySnapshot.forEach((doc) => {
-      console.log("📄 User document found:", doc.id, doc.data())
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    // querySnapshot.forEach((doc) => {
+    //   console.log("📄 User document found:", doc.id, doc.data())
+    //   data.push({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   })
+    // })
+    const response = await api.get(`/willful-defaulter/user/${userId}`);
 
-    console.log("✅ User submissions found:", data.length)
-    return data
+    console.log("✅ User submissions found:", response.data.length)
+    return response.data
   } catch (error) {
     console.error("❌ Error fetching user willful defaulter submissions:", error)
     throw error
@@ -711,26 +728,27 @@ export const getWillfulDefaulterSubmissionsByUser = async (userId) => {
 export const getWillfulDefaulterSubmissionsByStatus = async (status) => {
   try {
     console.log("🔍 Fetching submissions with status:", status)
-    const q = query(
-      collection(db, "willfulDefaulterSubmissions"),
-      where("status", "==", status),
-      orderBy("submittedAt", "desc"),
-    )
-    const querySnapshot = await getDocs(q)
+    // const q = query(
+    //   collection(db, "willfulDefaulterSubmissions"),
+    //   where("status", "==", status),
+    //   orderBy("submittedAt", "desc"),
+    // )
+    // const querySnapshot = await getDocs(q)
     const data = []
 
-    console.log("📊 Status query snapshot size:", querySnapshot.size)
+    // console.log("📊 Status query snapshot size:", querySnapshot.size)
 
-    querySnapshot.forEach((doc) => {
-      console.log("📄 Status document found:", doc.id, doc.data())
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    // querySnapshot.forEach((doc) => {
+    //   console.log("📄 Status document found:", doc.id, doc.data())
+    //   data.push({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   })
+    // })
+    const response = await api.get(`/willful-defaulter/status/${status}`);
 
-    console.log("✅ Status submissions found:", data.length)
-    return data
+    console.log("✅ Status submissions found:", response.data.length)
+    return response.data
   } catch (error) {
     console.error("❌ Error fetching willful defaulter submissions by status:", error)
     throw error
@@ -741,15 +759,24 @@ export const getWillfulDefaulterSubmissionsByStatus = async (status) => {
 export const getWillfulDefaulterSubmissionById = async (submissionId) => {
   try {
     console.log("🔍 Fetching submission by ID:", submissionId)
-    const docRef = doc(db, "willfulDefaulterSubmissions", submissionId)
-    const docSnap = await getDoc(docRef)
+    // const docRef = doc(db, "willfulDefaulterSubmissions", submissionId)
+    // const docSnap = await getDoc(docRef)
 
-    if (docSnap.exists()) {
-      console.log("✅ Submission found:", docSnap.data())
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-      }
+    // if (docSnap.exists()) {
+    //   console.log("✅ Submission found:", docSnap.data())
+    //   return {
+    //     id: docSnap.id,
+    //     ...docSnap.data(),
+    //   }
+    // } else {
+    //   console.log("❌ No submission found with ID:", submissionId)
+    //   return null
+    // }
+    const response = await api.get(`/willful-defaulter/${submissionId}`);
+
+    if (response.data) {
+      console.log("✅ Submission found:", response.data)
+      return response.data
     } else {
       console.log("❌ No submission found with ID:", submissionId)
       return null
@@ -760,22 +787,33 @@ export const getWillfulDefaulterSubmissionById = async (submissionId) => {
   }
 }
 
-// Test function to check Firebase connection
+export const saveWillfulDefaulterDraft = async (formData) => {
+  try {
+    const draftData = { ...formData, status: "draft" };
+    const response = await api.post('/willful-defaulter', draftData);
+    
+    return {
+      success: true,
+      id: response.data.id,
+      message: "Draft saved successfully",
+    };
+  } catch (error) {
+    console.error("Error saving draft:", error);
+    throw error;
+  }
+};
+
 export const testFirebaseConnection = async () => {
   try {
-    console.log("🧪 Testing Firebase connection...")
-    const testQuery = query(collection(db, "willfulDefaulterSubmissions"))
-    const snapshot = await getDocs(testQuery)
-    console.log("✅ Firebase connection successful. Documents found:", snapshot.size)
-
-    // Log all document IDs
-    snapshot.forEach((doc) => {
-      console.log("📄 Document ID:", doc.id)
-    })
-
-    return true
+    console.log("🧪 Testing backend API sanity check connection...");
+    const response = await api.get('/willful-defaulter');
+    if (response.status === 200) {
+       console.log("✅ Server communication established perfectly.");
+       return true;
+    }
+    return false;
   } catch (error) {
-    console.error("❌ Firebase connection failed:", error)
-    return false
+    console.error("❌ Server communication failed:", error);
+    return false;
   }
-}
+};
