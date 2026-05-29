@@ -70,6 +70,9 @@ function AdminDocumentsList() {
   const [openStatusDialog, setOpenStatusDialog] = useState(false)
   const [openReviewerDialog, setOpenReviewerDialog] = useState(false)
   const [currentSubmission, setCurrentSubmission] = useState(null)
+  const [page, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [size, setPageSize] = useState(10);
 
   useEffect(() => {
     if (authLoading) return // Wait until auth is ready
@@ -77,7 +80,7 @@ function AdminDocumentsList() {
 
     fetchSubmissions()
     fetchReviewers()
-  }, [currentUser, authLoading])
+  }, [currentUser, authLoading,page])
 
   useEffect(() => {
     // Filter submissions based on search term and filter status
@@ -149,47 +152,67 @@ function AdminDocumentsList() {
   //     setLoading(false)
   //   }
   // }
+// const fetchSubmissions = async () => {
+//     setLoading(true)
+//     setError(null)
+//     try {
+//       // Fetch all submissions for the admin
+//       const response = await api.get(`/vetting/submissions/queue`,{ params: { page, size } });
+//       const data = response.data;
+      
+//       data.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+//       setSubmissions(data.content)
+//       setFilteredSubmissions(data.content)
+//       setTotalPages(data.totalPages)
+//     } catch (err) {
+//       console.error("Error fetching submissions: ", err)
+//       setError("Failed to fetch submissions. Please try again.")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
 const fetchSubmissions = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      // Fetch all submissions for the admin
-      const response = await api.get(`/vetting/submissions/queue`);
+      const response = await api.get(`/vetting/submissions/queue`, { params: { page, size } });
       const data = response.data;
       
-      data.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      let submissionsArray = [];
+      let totalPagesCount = 1;
 
-      setSubmissions(data)
-      setFilteredSubmissions(data)
+      // 1. Safely check if the backend returned a Page object (has .content) or a standard List (Array)
+      if (data && data.content) {
+          submissionsArray = data.content;
+          totalPagesCount = data.totalPages;
+      } else if (Array.isArray(data)) {
+          submissionsArray = data;
+      }
+
+      // 2. Sort the actual array (not the Page wrapper object)
+      if (submissionsArray.length > 0) {
+          submissionsArray.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      }
+
+      // 3. Fallback to empty array [] so it never passes 'undefined' to your state
+      setSubmissions(submissionsArray || []);
+      setFilteredSubmissions(submissionsArray || []);
+      setTotalPages(totalPagesCount || 1);
+      
     } catch (err) {
-      console.error("Error fetching submissions: ", err)
-      setError("Failed to fetch submissions. Please try again.")
+      console.error("Error fetching submissions: ", err);
+      setError("Failed to fetch submissions. Please try again.");
+      
+      // Fallback on error to prevent crashes
+      setSubmissions([]);
+      setFilteredSubmissions([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
-
-  // Also replace fetchReviewers in adminList.js
-  // const fetchReviewers = async () => {
-  //   try {
-  //     // Create an endpoint in Spring Boot to fetch users by role
-  //     const response = await api.get(`/users/role/review`);
-  //     setReviewers(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching reviewers:", error);
-  //   }
-  // }
-
-  // const fetchReviewers = async () => {
-  //   try {
-  //     const q = query(collection(db, "users"), where("role", "==", "review"))
-  //     const snapshot = await getDocs(q)
-  //     const data = snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
-  //     setReviewers(data)
-  //   } catch (error) {
-  //     console.error("Error fetching reviewers:", error)
-  //   }
-  // }
+  
 
   const fetchReviewers = async () => {
     try {
@@ -691,7 +714,29 @@ const handleAssignStatus = async () => {
             ))}
           </Grid>
         )}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, pb: 1, px: 2 }}>
+            <Button 
+                variant="outlined"
+                disabled={page === 0} 
+                onClick={() => setCurrentPage(prev => prev - 1)}
+            >
+                Previous
+            </Button>
+
+            <Typography variant="body2" color="text.secondary">
+                Page {page + 1} of {totalPages === 0 ? 1 : totalPages}
+            </Typography>
+
+            <Button 
+                variant="outlined"
+                disabled={page >= totalPages - 1} 
+                onClick={() => setCurrentPage(prev => prev + 1)}
+            >
+                Next
+            </Button>
+        </Box>
       </Paper>
+      
 
       {/* Status Change Dialog */}
       <Dialog open={openStatusDialog} onClose={() => setOpenStatusDialog(false)} maxWidth="xs" fullWidth>

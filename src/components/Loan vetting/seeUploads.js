@@ -53,13 +53,16 @@ function SeeUploads() {
   const [anchorEl, setAnchorEl] = useState(null)
   const { currentUser, loading: authLoading } = useAuth()
   const history = useHistory()
+  const [page, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [size, setPageSize] = useState(10);
 
   useEffect(() => {
     if (authLoading) return // Wait until auth is ready
     if (!currentUser) return // Redirect will happen in render
 
     fetchSubmissions()
-  }, [currentUser, authLoading])
+  }, [currentUser, authLoading, page])
 
   useEffect(() => {
     // Filter submissions based on search term and filter status
@@ -143,17 +146,35 @@ function SeeUploads() {
     setError(null)
     try {
       // Call your Spring Boot endpoint
-      const response = await api.get(`/vetting/submissions/user/${currentUser.uid}`);
+      const response = await api.get(`/vetting/submissions/user/${currentUser.uid}`,{ params: { page, size } });
       const data = response.data;
-      
-      // Sort newest first
-      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      let submissionsArray = [];
+      let totalPagesCount = 1;
 
-      setSubmissions(data)
-      setFilteredSubmissions(data)
+      if (data && data.content) {
+          submissionsArray = data.content;
+          totalPagesCount = data.totalPages;
+      } else if (Array.isArray(data)) {
+          submissionsArray = data;
+      }
+
+      // 2. Safely sort
+      if (submissionsArray.length > 0) {
+          submissionsArray.sort((a, b) => new Date(b.submittedAt || b.createdAt) - new Date(a.submittedAt || a.createdAt));
+      }
+
+      // 3. Safely set state
+      setSubmissions(submissionsArray || []); // Or setUploads() depending on the file
+      setTotalPages(totalPagesCount || 1);
+      
+      // If you have a filtered state in this file, set it too:
+      if (typeof setFilteredSubmissions === 'function') {
+          setFilteredSubmissions(submissionsArray || []);
+      }
     } catch (err) {
       console.error("Error fetching submissions: ", err)
       setError("Failed to fetch submissions. Please try again.")
+      setSubmissions([])
     } finally {
       setLoading(false)
     }
@@ -502,6 +523,27 @@ function SeeUploads() {
             ))}
           </Grid>
         )}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, pb: 1, px: 2 }}>
+            <Button 
+                variant="outlined"
+                disabled={page === 0} 
+                onClick={() => setCurrentPage(prev => prev - 1)}
+            >
+                Previous
+            </Button>
+
+            <Typography variant="body2" color="text.secondary">
+                Page {page + 1} of {totalPages === 0 ? 1 : totalPages}
+            </Typography>
+
+            <Button 
+                variant="outlined"
+                disabled={page >= totalPages - 1} 
+                onClick={() => setCurrentPage(prev => prev + 1)}
+            >
+                Next
+            </Button>
+        </Box>
       </Paper>
     </Container>
   )

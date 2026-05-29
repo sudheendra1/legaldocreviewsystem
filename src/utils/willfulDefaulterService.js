@@ -665,7 +665,7 @@ export const getWillfulDefaulterData = async (filters = {}) => {
 // }
 
 // Function to get all willful defaulter submissions for admin/dashboard view
-export const getAllWillfulDefaulterSubmissions = async () => {
+export const getAllWillfulDefaulterSubmissions = async (page = 0, size = 10) => {
   try {
     console.log("🔍 Fetching all willful defaulter submissions...")
     // const q = query(collection(db, "willfulDefaulterSubmissions"), orderBy("submittedAt", "desc"))
@@ -681,7 +681,7 @@ export const getAllWillfulDefaulterSubmissions = async () => {
     //     ...doc.data(),
     //   })
     // })
-    const response = await api.get('/willful-defaulter');
+    const response = await api.get('/willful-defaulter',{params: { page, size }});
     console.log("✅ Data successfully fetched from MongoDB. Total submissions:", response.data.length);
      return response.data;
 
@@ -694,7 +694,7 @@ export const getAllWillfulDefaulterSubmissions = async () => {
 }
 
 // Function to get willful defaulter submissions by user
-export const getWillfulDefaulterSubmissionsByUser = async (userId) => {
+export const getWillfulDefaulterSubmissionsByUser = async (userId, page = 0, size = 10) => {
   try {
     console.log("🔍 Fetching submissions for user:", userId)
     // const q = query(
@@ -714,7 +714,7 @@ export const getWillfulDefaulterSubmissionsByUser = async (userId) => {
     //     ...doc.data(),
     //   })
     // })
-    const response = await api.get(`/willful-defaulter/user/${userId}`);
+    const response = await api.get(`/willful-defaulter/user/${userId}`,{params: { page, size }});
 
     console.log("✅ User submissions found:", response.data.length)
     return response.data
@@ -725,7 +725,7 @@ export const getWillfulDefaulterSubmissionsByUser = async (userId) => {
 }
 
 // Function to get willful defaulter submissions by status
-export const getWillfulDefaulterSubmissionsByStatus = async (status) => {
+export const getWillfulDefaulterSubmissionsByStatus = async (status,page = 0, size = 10) => {
   try {
     console.log("🔍 Fetching submissions with status:", status)
     // const q = query(
@@ -745,7 +745,7 @@ export const getWillfulDefaulterSubmissionsByStatus = async (status) => {
     //     ...doc.data(),
     //   })
     // })
-    const response = await api.get(`/willful-defaulter/status/${status}`);
+    const response = await api.get(`/willful-defaulter/status/${status}`,{params: { page, size }});
 
     console.log("✅ Status submissions found:", response.data.length)
     return response.data

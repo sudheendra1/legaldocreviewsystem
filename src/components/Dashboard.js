@@ -1,524 +1,4 @@
-// "use client"
 
-// import { useState, useEffect } from "react"
-// import { Link, Redirect,useHistory} from "react-router-dom"
-// import { useAuth } from "../contexts/AuthContext"
-// import { doc, getDoc } from "firebase/firestore"
-// import { signOut } from "firebase/auth"
-// import { auth, db } from "../firebase/config"
-// import {
-//   Box,
-//   Typography,
-//   Button,
-//   AppBar,
-//   Toolbar,
-//   Drawer,
-//   List,
-//   ListItem,
-//   ListItemIcon,
-//   ListItemText,
-//   Avatar,
-//   Card,
-//   CardContent,
-//   CardActions,
-//   Grid,
-//   Chip,
-//   Divider,
-//   Skeleton,
-//   IconButton,
-//   useTheme,
-//   useMediaQuery,
-// } from "@mui/material"
-// import { UploadIcon, FileTextIcon, LogOutIcon, MenuIcon, UsersIcon, HomeIcon, CheckSquareIcon } from "lucide-react"
-// import PersonAddIcon from "@mui/icons-material/PersonAdd"
-// import ReviewDocumentsList from "./Loan vetting/ReviewDocumentsList"
-
-// const drawerWidth = 240
-
-// function Dashboard() {
-//   const { currentUser, loading } = useAuth()
-//   const [role, setRole] = useState(null)
-//   const [roleLoading, setRoleLoading] = useState(true)
-//   const [mobileOpen, setMobileOpen] = useState(false)
-//   const history = useHistory()
-//   const theme = useTheme()
-//   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-
-//   useEffect(() => {
-//     const fetchRole = async () => {
-//       if (!currentUser) {
-//         setRole(null)
-//         setRoleLoading(false)
-//         return
-//       }
-
-//       if (currentUser) {
-//         try {
-//           const docRef = doc(db, "users", currentUser.uid)
-//           const docSnap = await getDoc(docRef)
-//           if (docSnap.exists()) {
-//             const userData = docSnap.data()
-//             setRole(userData.role || null)
-//           }
-//         } catch (error) {
-//           console.error("Error fetching role:", error)
-//         } finally {
-//           setRoleLoading(false)
-//         }
-//       }
-//     }
-//     if (!loading) {
-//       fetchRole()
-//     }
-//   }, [currentUser, loading])
-
-//   const handleLogout = async () => {
-//     try {
-//       await signOut(auth)
-//       history.push("/login")
-//     } catch (error) {
-//       console.error("Error signing out:", error)
-//     }
-//   }
-
-//   const handleDrawerToggle = () => {
-//     setMobileOpen(!mobileOpen)
-//   }
-
-//   if (loading || roleLoading) {
-//     return <LoadingSkeleton />
-//   }
-
-//   if (!loading && !currentUser) {
-//     history.push("/landing")
-//     return null
-//   }
-
-//   const getRoleColor = () => {
-//     switch (role) {
-//       case "admin":
-//         return "error"
-//       case "review":
-//         return "warning"
-//       case "user":
-//         return "success"
-//       default:
-//         return "default"
-//     }
-//   }
-
-//   const getRoleLabel = () => {
-//     switch (role) {
-//       case "admin":
-//         return "Administrator"
-//       case "review":
-//         return "Reviewer"
-//       case "user":
-//         return "User"
-//       default:
-//         return "Unknown Role"
-//     }
-//   }
-
-//   const drawer = (
-//     <Box sx={{ overflow: "auto" }}>
-//       <Box
-//         sx={{
-//           display: "flex",
-//           flexDirection: "column",
-//           alignItems: "center",
-//           p: 2,
-//         }}
-//       >
-//         <Avatar
-//           sx={{
-//             width: 64,
-//             height: 64,
-//             bgcolor: theme.palette.primary.main,
-//             mb: 1,
-//           }}
-//         >
-//           {currentUser?.email?.charAt(0).toUpperCase() || "U"}
-//         </Avatar>
-//         <Typography variant="subtitle1" fontWeight="bold">
-//           {currentUser?.email?.split("@")[0]}
-//         </Typography>
-//         <Chip label={getRoleLabel()} color={getRoleColor()} size="small" sx={{ mt: 1 }} />
-//       </Box>
-//       <Divider />
-//       <List>
-//         <ListItem button component={Link} to="/dashboard">
-//           <ListItemIcon>
-//             <HomeIcon size={20} />
-//           </ListItemIcon>
-//           <ListItemText primary="Dashboard" />
-//         </ListItem>
-
-//         {role === "user" && (
-//           <>
-//             <ListItem button component={Link} to="/upload">
-//               <ListItemIcon>
-//                 <UploadIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Vetting of loan documents" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/seeUploads">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="My Uploads" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/litigation">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Litigation Monitoring" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/training">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Training" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/health">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Health consultation" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/guidance">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Guidance to startups" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/research">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Research" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/notation">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Nation's Enemy" />
-//             </ListItem>
-//           </>
-//         )}
-
-//         {role === "review" && (
-//           <>
-//           <ListItem button component={Link} to="/review">
-//             <ListItemIcon>
-//               <CheckSquareIcon size={20} />
-//             </ListItemIcon>
-//             <ListItemText primary="Review Documents" />
-//           </ListItem>
-//           <ListItem button component={Link} to="/willFullDefaulter">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="WillFull Defaulter" />
-//             </ListItem>
-          
-//           </>
-          
-//         )}
-
-//         {role === "admin" && (
-//           <>
-//             <ListItem button component={Link} to="/adminDocs">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Vetting of loan documents" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/litigation">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Litigation Monitoring" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/training">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Training" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/willFullDefaulterDashboard">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="WillFull Defaulter" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/health">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Health consultation" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/guidance">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Guidance to startups" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/research">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Research" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/notation">
-//               <ListItemIcon>
-//                 <FileTextIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Notation ecr" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/reviewers">
-//               <ListItemIcon>
-//                 <UsersIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Manage Employees" />
-//             </ListItem>
-//             <ListItem button component={Link} to="/createUser">
-//               <ListItemIcon>
-//                 <PersonAddIcon size={20} />
-//               </ListItemIcon>
-//               <ListItemText primary="Create User" />
-//             </ListItem>
-//           </>
-//         )}
-//       </List>
-//       <Divider />
-//       <List>
-//         <ListItem button onClick={handleLogout}>
-//           <ListItemIcon>
-//             <LogOutIcon size={20} color={theme.palette.error.main} />
-//           </ListItemIcon>
-//           <ListItemText primary="Logout" primaryTypographyProps={{ color: "error" }} />
-//         </ListItem>
-//       </List>
-//     </Box>
-//   )
-
-//   return (
-//     <Box sx={{ display: "flex" }}>
-//       <AppBar
-//         position="fixed"
-//         sx={{
-//           width: { sm: `calc(100% - ${drawerWidth}px)` },
-//           ml: { sm: `${drawerWidth}px` },
-//         }}
-//       >
-//         <Toolbar>
-//           <IconButton
-//             color="inherit"
-//             aria-label="open drawer"
-//             edge="start"
-//             onClick={handleDrawerToggle}
-//             sx={{ mr: 2, display: { sm: "none" } }}
-//           >
-//             <MenuIcon />
-//           </IconButton>
-//           <Typography variant="h6" noWrap component="div">
-//             JuraTech
-//           </Typography>
-//         </Toolbar>
-//       </AppBar>
-//       <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
-//         <Drawer
-//           variant={isMobile ? "temporary" : "permanent"}
-//           open={mobileOpen}
-//           onClose={handleDrawerToggle}
-//           ModalProps={{
-//             keepMounted: true, // Better open performance on mobile
-//           }}
-//           sx={{
-//             display: { xs: "block", sm: "block" },
-//             "& .MuiDrawer-paper": {
-//               boxSizing: "border-box",
-//               width: drawerWidth,
-//             },
-//           }}
-//         >
-//           {drawer}
-//         </Drawer>
-//       </Box>
-//       <Box
-//         component="main"
-//         sx={{
-//           flexGrow: 1,
-//           p: 3,
-//           width: { sm: `calc(100% - ${drawerWidth}px)` },
-//           mt: "64px",
-//         }}
-//       >
-//         <Typography variant="h4" gutterBottom>
-//           Welcome to your Dashboard
-//         </Typography>
-//         <Typography variant="body1" color="text.secondary" paragraph>
-//           Here's what you can do based on your role:
-//         </Typography>
-
-//         <Grid container spacing={3} sx={{ mt: 2 }}>
-//           {role === "user" && (
-//             <>
-//               <Grid item xs={12} sm={6} md={6}>
-//                 <ActionCard
-//                   title="Upload Documents"
-//                   description="Submit new documents for review"
-//                   icon={<UploadIcon size={40} />}
-//                   to="/upload"
-//                   buttonText="Upload Now"
-//                 />
-//               </Grid>
-//               <Grid item xs={12} sm={6} md={6}>
-//                 <ActionCard
-//                   title="View Your Uploads"
-//                   description="Check the status of your submitted documents"
-//                   icon={<FileTextIcon size={40} />}
-//                   to="/seeUploads"
-//                   buttonText="View Uploads"
-//                 />
-//               </Grid>
-//             </>
-//           )}
-
-//           {role === "review" && (
-//             // <Grid item xs={12} sm={6} md={6}>
-//             //   <ActionCard
-//             //     title="Review Documents"
-//             //     description="Review and process submitted documents"
-//             //     icon={<CheckSquareIcon size={40} />}
-//             //     to="/review"
-//             //     buttonText="Start Reviewing"
-//             //   />
-//             // </Grid>
-             
-//     <ReviewDocumentsList />
-  
-//           )}
-
-//           {role === "admin" && (
-//             <>
-//               <Grid item xs={12} sm={6} md={6}>
-//                 <ActionCard
-//                   title="Manage Documents"
-//                   description="View and manage all documents in the system"
-//                   icon={<FileTextIcon size={40} />}
-//                   to="/adminDocs"
-//                   buttonText="View Documents"
-//                 />
-//               </Grid>
-//               <Grid item xs={12} sm={6} md={6}>
-//                 <ActionCard
-//                   title="Manage Employees"
-//                   description="View and manage employee accounts and permissions"
-//                   icon={<UsersIcon size={40} />}
-//                   to="/reviewers"
-//                   buttonText="Manage Employees"
-//                 />
-//               </Grid>
-//             </>
-//           )}
-//         </Grid>
-//       </Box>
-//     </Box>
-//   )
-// }
-
-// function ActionCard({ title, description, icon, to, buttonText }) {
-//   return (
-//     <Card
-//       sx={{
-//         height: "100%",
-//         display: "flex",
-//         flexDirection: "column",
-//         transition: "transform 0.2s, box-shadow 0.2s",
-//         "&:hover": {
-//           transform: "translateY(-4px)",
-//           boxShadow: 4,
-//         },
-//       }}
-//     >
-//       <CardContent sx={{ flexGrow: 1 }}>
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             mb: 2,
-//             color: "primary.main",
-//           }}
-//         >
-//           {icon}
-//         </Box>
-//         <Typography variant="h6" component="h2" gutterBottom>
-//           {title}
-//         </Typography>
-//         <Typography variant="body2" color="text.secondary">
-//           {description}
-//         </Typography>
-//       </CardContent>
-//       <CardActions>
-//         <Button component={Link} to={to} variant="contained" color="primary" fullWidth>
-//           {buttonText}
-//         </Button>
-//       </CardActions>
-//     </Card>
-//   )
-// }
-
-// function LoadingSkeleton() {
-//   return (
-//     <Box sx={{ display: "flex" }}>
-//       <Box
-//         sx={{
-//           width: drawerWidth,
-//           flexShrink: 0,
-//           display: { xs: "none", sm: "block" },
-//         }}
-//       >
-//         <Box sx={{ width: drawerWidth }}>
-//           <Box sx={{ p: 2 }}>
-//             <Skeleton variant="circular" width={64} height={64} sx={{ mx: "auto" }} />
-//             <Skeleton variant="text" height={30} sx={{ mt: 1 }} />
-//             <Skeleton variant="rectangular" height={24} sx={{ mt: 1 }} width="60%" />
-//           </Box>
-//           <Divider />
-//           <Box sx={{ p: 2 }}>
-//             {[1, 2, 3, 4].map((item) => (
-//               <Skeleton key={item} height={48} sx={{ my: 1 }} />
-//             ))}
-//           </Box>
-//         </Box>
-//       </Box>
-//       <Box
-//         component="main"
-//         sx={{
-//           flexGrow: 1,
-//           p: 3,
-//           width: { sm: `calc(100% - ${drawerWidth}px)` },
-//           mt: "64px",
-//         }}
-//       >
-//         <Skeleton variant="text" height={60} width="50%" />
-//         <Skeleton variant="text" height={30} width="70%" sx={{ mb: 3 }} />
-
-//         <Grid container spacing={3}>
-//           {[1, 2].map((item) => (
-//             <Grid item xs={12} sm={6} key={item}>
-//               <Skeleton variant="rectangular" height={200} />
-//             </Grid>
-//           ))}
-//         </Grid>
-//       </Box>
-//     </Box>
-//   )
-// }
-
-// export default Dashboard
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -591,6 +71,9 @@ function Dashboard() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
   const [activityFeed, setActivityFeed] = useState([])
+  const [page, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [size, setPageSize] = useState(10);
   const role = contextRole ? contextRole.toLowerCase().replace("reviewer", "review") : null;
 
   // 1. Fetch User Role
@@ -704,20 +187,23 @@ function Dashboard() {
           ? '/activities/global' 
           : `/activities/user/${currentUser.uid}`;
 
-        const response = await api.get(endpoint);
+        const response = await api.get(endpoint,{ params: { page, size } });
+        console.log("Fetched activities:", response.data);
         
         // Format the timestamps for the UI
-        const formattedActivities = response.data.map(log => ({
+        const formattedActivities = response.data.content.map(log => ({
             id: log.id,
             type: log.type || "System",
             user: log.userName || 'A user',
             text: log.description,
             time: formatTimeAgo(new Date(log.createdAt))
         }));
+        console.log("Total Pages:", response.data.totalPages);
 
         // Replace the old activityFeed logic with this direct state
         // (You'll need to add const [activityFeed, setActivityFeed] = useState([]) at the top of your component)
         setActivityFeed(formattedActivities);
+        setTotalPages(response.data.totalPages || 0)
         
       } catch (error) {
         console.error("Error fetching activities:", error);
@@ -732,7 +218,7 @@ function Dashboard() {
     const interval = setInterval(fetchActivities, 30000);
     return () => clearInterval(interval);
 
-  }, [currentUser, role]);
+  }, [currentUser, role, page]);
 
   const handleLogout = async () => {
     try {
@@ -982,6 +468,27 @@ function Dashboard() {
             </List>
           )}
         </Paper>
+         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+    <button 
+        className="btn btn-secondary"
+        disabled={page === 0} 
+        onClick={() => setCurrentPage(prev => prev - 1)}
+    >
+        Previous
+    </button>
+
+    <span>
+        Page {page + 1} of {totalPages === 0 ? 1 : totalPages}
+    </span>
+
+    <button 
+        className="btn btn-secondary"
+        disabled={page >= totalPages - 1} 
+        onClick={() => setCurrentPage(prev => prev + 1)}
+    >
+        Next
+    </button>
+</div>
       </Box>
     </Box>
   )

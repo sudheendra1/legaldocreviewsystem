@@ -15,12 +15,15 @@ export default function WillfulDefaulterDashboard() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("all") // all, pending, approved, rejected
   const [viewMode, setViewMode] = useState("all") // all, mySubmissions
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const { currentUser } = useAuth()
   const history = useHistory()
 
   useEffect(() => {
     fetchSubmissions()
-  }, [filter, viewMode, currentUser])
+  }, [filter, viewMode, currentUser,currentPage])
 
   const fetchSubmissions = async () => {
     setLoading(true)
@@ -34,17 +37,18 @@ export default function WillfulDefaulterDashboard() {
 
       if (viewMode === "mySubmissions" && currentUser) {
         console.log("🔄 Fetching user submissions...")
-        data = await getWillfulDefaulterSubmissionsByUser(currentUser.uid)
+        data = await getWillfulDefaulterSubmissionsByUser(currentUser.uid,currentPage, pageSize)
       } else if (filter === "all") {
         console.log("🔄 Fetching all submissions...")
-        data = await getAllWillfulDefaulterSubmissions()
+        data = await getAllWillfulDefaulterSubmissions(currentPage, pageSize)
       } else {
         console.log("🔄 Fetching submissions by status...")
         data = await getWillfulDefaulterSubmissionsByStatus(filter)
       }
 
       console.log("✅ Dashboard: Fetched data:", data)
-      setSubmissions(data)
+      setSubmissions(data.content || [])
+      setTotalPages(data.totalPages || 0)
     } catch (error) {
       console.error("❌ Dashboard: Error fetching submissions:", error)
       // Add error state to show user
@@ -269,6 +273,27 @@ export default function WillfulDefaulterDashboard() {
                     ))}
                   </tbody>
                 </table>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+    <button 
+        className="btn btn-secondary"
+        disabled={currentPage === 0} 
+        onClick={() => setCurrentPage(prev => prev - 1)}
+    >
+        Previous
+    </button>
+
+    <span>
+        Page {currentPage + 1} of {totalPages === 0 ? 1 : totalPages}
+    </span>
+
+    <button 
+        className="btn btn-secondary"
+        disabled={currentPage >= totalPages - 1} 
+        onClick={() => setCurrentPage(prev => prev + 1)}
+    >
+        Next
+    </button>
+</div>
               </div>
             )}
           </div>
